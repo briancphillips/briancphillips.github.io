@@ -1,0 +1,20 @@
+.idea/
+build/
+dist/
+images2
+images-copy
+env
+difPy
+/Thexder.tiled-session
+/Thexder.tiled-project
+/Level1.tsj
+/LICENSE.txt
+/Bugh.tsx
+.DS_Store
+/example_output.png
+/map.tmj
+/README.md
+/setup.cfg
+/setup.py
+/Thexder.tmj
+/images/untitled folder
