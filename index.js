@@ -10,9 +10,9 @@ const tileW = 32;
 const tileH = 32;
 
 canvas.width = window.innerWidth;
-canvas.height = 32 * 26;
+canvas.height = 32 * 24;
 buffer.width = 32 * 546;
-buffer.height = 32 * 44;
+buffer.height = 32 * 47;
 class Camera {
   constructor(pos) {
     this.pos = pos;
