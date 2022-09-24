@@ -102,7 +102,7 @@ async function parseJson(url) {
   }
 }
 
-const level = parseJson("./map.json").then((m) => {
+const level = parseJson("/map.json").then((m) => {
   const layers = m.layers;
   const cols = m.width;
   const tileMapCols = m.tilewidth;
@@ -110,7 +110,7 @@ const level = parseJson("./map.json").then((m) => {
   bufferCtx.fillRect(0, 0, buffer.width, buffer.height);
 
   layers.forEach((layer) => {
-    loadImage("./images/tiles32x32.png").then((img) => {
+    loadImage("/images/tiles32x32.png").then((img) => {
       layer.data.forEach((element, i) => {
         const col = i % cols;
         const row = parseInt(i / cols, 10);
