@@ -16,10 +16,49 @@ buffer.height = 32 * 47;
 class Camera {
   constructor(pos) {
     this.pos = pos;
+    this.scrollBounds = {
+      x1: canvas.width / 4,
+      y1: buffer.height / 2 - tileH * 4,
+      x2: canvas.width - canvas.width / 4,
+      y2: buffer.height,
+    };
   }
   update() {
-    this.pos.x = player.pos.x - canvas.width / 2;
-    this.pos.y = player.pos.y - canvas.height / 2;
+    if (
+      player.pos.x > this.scrollBounds.x1 ||
+      player.pos.x < this.scrollBounds.x2
+    )
+      this.pos.x = player.pos.x - canvas.width / 2;
+    //this.pos.x = player.pos.x - canvas.width / 2;
+    if (
+      player.pos.y > this.scrollBounds.y1 &&
+      player.pos.y < this.scrollBounds.y2
+    )
+      this.pos.y = player.pos.y - buffer.height / 2 + tileH * 4;
+
+    ctx.drawImage(
+      buffer,
+      camera.pos.x,
+      camera.pos.y,
+      canvas.width,
+      canvas.height,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "purple";
+    ctx.strokeRect(
+      this.scrollBounds.x1,
+      this.scrollBounds.y1,
+      this.scrollBounds.x2,
+      this.scrollBounds.y2
+    );
+    ctx.strokeStyle = "WHITE";
+    ctx.moveTo(0, camera.pos.y + player.pos.y);
+    ctx.lineTo(canvas.width, camera.pos.y + player.pos.y);
+    ctx.stroke();
     // if (this.pos.x >= 0) this.pos.x = player.pos.x;
     // if (this.pos.x < 0) this.pos.x = 0;
     // if (this.pos.x > buffer.width - canvas.width)
@@ -54,7 +93,7 @@ class Player {
     this.pos.x += this.vel.x;
     this.pos.y += this.vel.y;
 
-    if (this.pos.x < 0 - this.pos.x) this.pos.x = 0;
+    if (this.pos.x < 640) this.pos.x = 640;
     if (this.pos.x > buffer.width - this.w - canvas.width / 2)
       this.pos.x = buffer.width - this.w - canvas.width / 2;
 
@@ -134,27 +173,20 @@ const level = parseJson("./map.json").then((m) => {
 });
 
 function animate() {
-  ctx.drawImage(
-    buffer,
-    camera.pos.x,
-    camera.pos.y,
-    canvas.width,
-    canvas.height,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
-  ctx.fillStyle = "green";
-  ctx.fillRect(0, canvas.height - tileH * 3, canvas.width, canvas.height);
   camera.update();
+
+  // ctx.fillStyle = "green";
+  // ctx.fillRect(0, canvas.height - tileH * 3, canvas.width, canvas.height);
+
   player.update();
-  console.log({ CAMX: camera.pos.x, CAMY: camera.pos.y });
-  console.log({
-    PLYX: player.pos.x,
-    PLYY: player.pos.y,
-    PLYCAMVELX: player.pos.x - camera.pos.x,
-  });
+  // console.log({ CAMX: camera.pos.x, CAMY: camera.pos.y });
+  // console.log({
+  //   PLYX: player.pos.x,
+  //   PLYY: player.pos.y,
+  //   PLYCAMVELX: player.pos.x - camera.pos.x,
+  // });
+  //console.log(camera.scrollBounds.y1);
+  console.log(player.pos.y);
   window.requestAnimationFrame(animate);
 }
 
@@ -201,7 +233,7 @@ window.addEventListener("keydown", (e) => {
       player.vel.y = -32;
     }
   }
-  console.log(e.code);
+  //console.log(e.code);
 });
 // window.addEventListener("resize", (e) => {
 //   canvas.width = window.innerWidth;
