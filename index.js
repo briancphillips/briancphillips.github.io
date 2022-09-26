@@ -12,7 +12,7 @@ const tileH = 32;
 canvas.width = window.innerWidth;
 canvas.height = 32 * 24;
 buffer.width = 32 * 546;
-buffer.height = 32 * 44;
+buffer.height = 32 * 46;
 class Camera {
   constructor(pos) {
     this.pos = pos;
@@ -79,7 +79,40 @@ class Camera {
     //   this.pos.y = this.scrollBounds.y2;
 
     this.pos.x = -canvas.width / 2 + player.pos.x;
-    this.pos.y = -canvas.height / 2 + player.pos.y;
+
+    if (player.pos.y + tileH + player.h > buffer.height / 2) {
+      this.pos.y = -buffer.height / 2 + player.pos.y + player.h + tileH;
+    }
+    // if (Math.sign(player.vel.y) === -1) {
+    //   if (player.pos.y + tileH > buffer.height / 2) {
+    //     this.pos.y = -buffer.height / 2 + player.pos.y;
+    //     console.log("scolling");
+    //   } else {
+    //     this.pos.y = 0;
+    //   }
+    // }
+
+    // if (Math.sign(player.vel.y) === 1) {
+    //   if (player.pos.y + player.h + tileH > buffer.height / 2) {
+    //     this.pos.y = -384 + player.pos.y + player.h;
+    //     console.log("scolling");
+    //   } else {
+    //     this.pos.y = buffer.height;
+    //   }
+    // }
+
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "purple";
+    ctx.strokeRect(
+      this.scrollBounds.x1,
+      this.scrollBounds.y1,
+      this.scrollBounds.x2,
+      this.scrollBounds.y2
+    );
+    ctx.strokeStyle = "WHITE";
+    ctx.moveTo(0, buffer.height / 2 - tileH);
+    ctx.lineTo(canvas.width, buffer.height / 2 - tileH);
+    ctx.stroke();
     // if (
     //   player.pos.y > buffer.height / 2 + tileH &&
     //   Math.sign(player.vel.y) === 1
@@ -252,7 +285,7 @@ function animate() {
   window.requestAnimationFrame(animate);
 }
 
-player = new Player({ x: 640, y: 384 }, { x: 0, y: 0 });
+player = new Player({ x: 640, y: 384 - 128 }, { x: 0, y: 0 });
 camera = new Camera({ x: 0, y: 0 });
 window.camera = camera;
 animate();
