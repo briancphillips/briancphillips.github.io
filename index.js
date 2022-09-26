@@ -79,6 +79,7 @@ class Camera {
     //   this.pos.y = this.scrollBounds.y2;
 
     this.pos.x = -canvas.width / 2 + player.pos.x;
+    //this.pos.y = canvas.height / 2 - player.pos.y;
 
     if (player.pos.y + tileH + player.h > buffer.height / 2) {
       this.pos.y = -buffer.height / 2 + player.pos.y + player.h + tileH;
@@ -192,8 +193,8 @@ class Player {
     if (this.pos.y + this.h > buffer.height - tileH)
       this.pos.y = buffer.height - tileH - this.h;
     this.draw();
-    this.vel.x = 0;
-    this.vel.y = 0;
+    // this.vel.x = 0;
+    // this.vel.y = 0;
     //console.log(this.pos.x);
   }
 }
@@ -285,7 +286,7 @@ function animate() {
   window.requestAnimationFrame(animate);
 }
 
-player = new Player({ x: 640, y: 384 - 128 }, { x: 0, y: 0 });
+player = new Player({ x: 640, y: 384 }, { x: 0, y: 0 });
 camera = new Camera({ x: 0, y: 0 });
 window.camera = camera;
 animate();
