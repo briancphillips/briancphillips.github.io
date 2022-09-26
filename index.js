@@ -10,138 +10,19 @@ const tileW = 32;
 const tileH = 32;
 
 canvas.width = window.innerWidth;
-canvas.height = 32 * 24;
-buffer.width = 32 * 546;
-buffer.height = 32 * 46;
+canvas.height = tileH * 24;
+buffer.width = tileW * 546;
+buffer.height = tileH * 44;
 class Camera {
   constructor(pos) {
     this.pos = pos;
-    this.scrollBounds = {
-      x1: canvas.width / 4,
-      y1: canvas.height / 4,
-      x2: canvas.width / 2,
-      y2: canvas.height / 2,
-    };
-    this.scroll = 0;
   }
 
-  // update() {
-  //   if (
-  //     player.pos.x > this.scrollBounds.x1 ||
-  //     player.pos.x < this.scrollBounds.x2
-  //   )
-  //     this.pos.x = player.pos.x - canvas.width / 2;
-  //   //this.pos.x = player.pos.x - canvas.width / 2;
-  //   if (
-  //     player.pos.y > this.scrollBounds.y1 &&
-  //     player.pos.y < this.scrollBounds.y2
-  //   )
-  //     //this.pos.y = player.pos.y - buffer.height / 2 + tileH * 4;
-  //     this.pos.y = player.pos.y - buffer.height / 2 + tileH * 4;
-  //   ctx.drawImage(
-  //     buffer,
-  //     camera.pos.x,
-  //     camera.pos.y,
-  //     canvas.width,
-  //     canvas.height,
-  //     0,
-  //     0,
-  //     canvas.width,
-  //     canvas.height
-  //   );
-  //   ctx.lineWidth = 5;
-  //   ctx.strokeStyle = "purple";
-  //   ctx.strokeRect(
-  //     this.scrollBounds.x1,
-  //     this.scrollBounds.y1,
-  //     this.scrollBounds.x2,
-  //     this.scrollBounds.y2
-  //   );
-  //   ctx.strokeStyle = "WHITE";
-  //   ctx.moveTo(0, canvas.height - canvas.height / 4);
-  //   ctx.lineTo(canvas.width, canvas.height - canvas.height / 4);
-  //   ctx.stroke();
-  //   // if (this.pos.x >= 0) this.pos.x = player.pos.x;
-  //   // if (this.pos.x < 0) this.pos.x = 0;
-  //   // if (this.pos.x > buffer.width - canvas.width)
-  //   //   this.pos.x = buffer.width - canvas.width;
-
-  //   // if (this.pos.y > 0) this.pos.y = player.pos.y;
-  //   // if (this.pos.y < 0) this.pos.y = 0;
-  //   // if (this.pos.y > buffer.height - canvas.height)
-  //   //   this.pos.y = buffer.height - canvas.height;
-  // }
-
-  update() {
-    // if (player.pos.y < this.scrollBounds.y1) this.pos.y = this.scrollBounds.y1;
-    // if (player.pos.y > this.scrollBounds.y2 + this.scrollBounds.y1)
-    //   //this.pos.y = player.pos.y - buffer.height / 2 + tileH * 4;
-    //   this.pos.y = this.scrollBounds.y2;
-
-    this.pos.x = -canvas.width / 2 + player.pos.x;
-    //this.pos.y = canvas.height / 2 - player.pos.y;
-
-    if (player.pos.y + tileH + player.h > buffer.height / 2) {
-      this.pos.y = -buffer.height / 2 + player.pos.y + player.h + tileH;
-    }
-    // if (Math.sign(player.vel.y) === -1) {
-    //   if (player.pos.y + tileH > buffer.height / 2) {
-    //     this.pos.y = -buffer.height / 2 + player.pos.y;
-    //     console.log("scolling");
-    //   } else {
-    //     this.pos.y = 0;
-    //   }
-    // }
-
-    // if (Math.sign(player.vel.y) === 1) {
-    //   if (player.pos.y + player.h + tileH > buffer.height / 2) {
-    //     this.pos.y = -384 + player.pos.y + player.h;
-    //     console.log("scolling");
-    //   } else {
-    //     this.pos.y = buffer.height;
-    //   }
-    // }
-
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "purple";
-    ctx.strokeRect(
-      this.scrollBounds.x1,
-      this.scrollBounds.y1,
-      this.scrollBounds.x2,
-      this.scrollBounds.y2
-    );
-    ctx.strokeStyle = "WHITE";
-    ctx.moveTo(0, buffer.height / 2 - tileH);
-    ctx.lineTo(canvas.width, buffer.height / 2 - tileH);
-    ctx.stroke();
-    // if (
-    //   player.pos.y > buffer.height / 2 + tileH &&
-    //   Math.sign(player.vel.y) === 1
-    // ) {
-    //   this.pos.y = buffer.height - player.pos.y;
-    //   console.log("innnnnnn");
-    // }
-    // if (
-    //   player.pos.y + player.h >= buffer.height / 2 - tileH * 2 &&
-    //   Math.sign(player.vel.y) === -1
-    // )
-    //   this.pos.y = player.pos.y + tileH * 2 + player.h - buffer.height / 2;
-
-    // if (
-    //   player.pos.y <= buffer.height / 2 + tileH &&
-    //   Math.sign(player.vel.y) === 1
-    // )
-    //   this.pos.y = player.pos.y;
-
-    // if (
-    //   player.pos.y >= buffer.height / 2 - player.h - tileH &&
-    //   Math.sign(player.vel.y) === -1
-    // )
-    //   this.pos.y = player.pos.y + player.h + tileH - buffer.height / 2;
+  draw() {
     ctx.drawImage(
       buffer,
-      camera.pos.x,
-      camera.pos.y,
+      this.pos.x,
+      this.pos.y,
       canvas.width,
       canvas.height,
       0,
@@ -149,18 +30,11 @@ class Camera {
       canvas.width,
       canvas.height
     );
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "purple";
-    ctx.strokeRect(
-      this.scrollBounds.x1,
-      this.scrollBounds.y1,
-      this.scrollBounds.x2,
-      this.scrollBounds.y2
-    );
-    ctx.strokeStyle = "WHITE";
-    ctx.moveTo(0, buffer.height - camera.pos.y);
-    ctx.lineTo(canvas.width, buffer.height - camera.pos.y);
-    ctx.stroke();
+  }
+  update() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.draw();
   }
 }
 
@@ -185,13 +59,16 @@ class Player {
   update() {
     this.pos.x += this.vel.x;
     this.pos.y += this.vel.y;
-
     if (this.pos.x < 640) this.pos.x = 640;
     if (this.pos.x + this.w > buffer.width) this.pos.x = buffer.width - this.w;
 
     if (this.pos.y < tileH) this.pos.y = tileH;
     if (this.pos.y + this.h > buffer.height - tileH)
-      this.pos.y = buffer.height - tileH - this.h;
+      this.pos.y = buffer.height - this.h - tileH;
+    if (this.pos.x >= 864 && this.pos.x + this.w <= buffer.width - 864)
+      camera.pos.x = this.pos.x - canvas.width / 2;
+    if (this.pos.y <= 1024 && this.pos.y >= 384)
+      camera.pos.y = this.pos.y - canvas.height / 2;
     this.draw();
     // this.vel.x = 0;
     // this.vel.y = 0;
@@ -267,9 +144,13 @@ const level = parseJson("./map.json").then((m) => {
 function animate() {
   camera.update();
 
-  ctx.fillStyle = "green";
-  ctx.fillRect(0, canvas.height - tileH * 3, canvas.width, canvas.height);
-
+  // ctx.fillStyle = "green";
+  // ctx.fillRect(0, canvas.height - tileH, canvas.width, canvas.height);
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "white";
+  ctx.moveTo(0, buffer.height / 2);
+  ctx.lineTo(canvas.width, buffer.height / 2);
+  ctx.stroke();
   player.update();
   // console.log({ CAMX: camera.pos.x, CAMY: camera.pos.y });
   // console.log({
@@ -309,25 +190,25 @@ window.addEventListener("keydown", (e) => {
 
   if (e.code === "ArrowRight") {
     if (player.vel.x <= 0) {
-      player.vel.x = 8;
+      player.vel.x = 32;
     }
   }
 
   if (e.code === "ArrowLeft") {
     if (player.vel.x >= 0) {
-      player.vel.x = -8;
+      player.vel.x = -32;
     }
   }
 
   if (e.code === "ArrowDown") {
     if (player.vel.y <= 0) {
-      player.vel.y = 8;
+      player.vel.y = 32;
     }
   }
 
   if (e.code === "ArrowUp") {
     if (player.vel.y >= 0) {
-      player.vel.y = -8;
+      player.vel.y = -32;
     }
   }
   //console.log(e.code);
