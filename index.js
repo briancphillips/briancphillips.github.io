@@ -9,10 +9,12 @@ const bufferCtx = buffer.getContext("2d");
 const tileW = 32;
 const tileH = 32;
 
-canvas.width = window.innerWidth;
+//canvas.width = window.innerWidth;
+canvas.width = 1280;
+//canvas.height = 400;
 canvas.height = tileH * 24;
 buffer.width = tileW * 546;
-buffer.height = tileH * 44;
+buffer.height = tileH * 47;
 class Camera {
   constructor(pos) {
     this.pos = pos;
@@ -30,10 +32,22 @@ class Camera {
       canvas.width,
       canvas.height
     );
+    // ctx.fillStyle = "black";
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // ctx.lineWidth = 5;
+    // ctx.strokeStyle = "white";
+    // ctx.moveTo(0, buffer.height / 2);
+    // ctx.lineTo(canvas.width, buffer.height / 2);
+    // ctx.stroke();
+    // ctx.lineWidth = 5;
+    // ctx.strokeStyle = "purple";
+    // ctx.moveTo(0, canvas.height - 100);
+    // ctx.lineTo(canvas.width, canvas.height - 100);
+    // ctx.moveTo(0, 1024);
+    // ctx.lineTo(canvas.width, 1024);
+    ctx.stroke();
   }
   update() {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     this.draw();
   }
 }
@@ -64,15 +78,15 @@ class Player {
     if (this.pos.x > 17250) this.pos.x = 17250;
 
     if (this.pos.y < tileH) this.pos.y = tileH;
-    if (this.pos.y + this.h > buffer.height - tileH)
-      this.pos.y = buffer.height - this.h - tileH;
+    if (this.pos.y > 1248) this.pos.y = 1248;
+
     if (this.pos.x >= 640 && this.pos.x < buffer.width - 864)
       camera.pos.x = this.pos.x - canvas.width / 2;
-    if (this.pos.y <= 1024 && this.pos.y >= 384)
+    if (this.pos.y <= 1120 && this.pos.y >= 384)
       camera.pos.y = this.pos.y - canvas.height / 2;
     this.draw();
-    // this.vel.x = 0;
-    // this.vel.y = 0;
+    this.vel.x = 0;
+    this.vel.y = 0;
     //console.log(this.pos.x);
   }
 }
@@ -147,12 +161,22 @@ function animate() {
 
   // ctx.fillStyle = "green";
   // ctx.fillRect(0, canvas.height - tileH, canvas.width, canvas.height);
+  ctx.beginPath();
   ctx.lineWidth = 5;
   ctx.strokeStyle = "white";
   ctx.moveTo(0, buffer.height / 2);
   ctx.lineTo(canvas.width, buffer.height / 2);
   ctx.stroke();
+  ctx.beginPath();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "purple";
+  ctx.moveTo(0, canvas.height);
+  ctx.lineTo(canvas.width, canvas.height);
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
   player.update();
+
   // console.log({ CAMX: camera.pos.x, CAMY: camera.pos.y });
   // console.log({
   //   PLYX: player.pos.x,
