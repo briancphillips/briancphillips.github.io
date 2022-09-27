@@ -59,13 +59,14 @@ class Player {
   update() {
     this.pos.x += this.vel.x;
     this.pos.y += this.vel.y;
+
     if (this.pos.x < 640) this.pos.x = 640;
     if (this.pos.x > 17250) this.pos.x = 17250;
 
     if (this.pos.y < tileH) this.pos.y = tileH;
     if (this.pos.y + this.h > buffer.height - tileH)
       this.pos.y = buffer.height - this.h - tileH;
-    if (this.pos.x > 864 && this.pos.x + this.w < buffer.width - 864)
+    if (this.pos.x >= 640 && this.pos.x < buffer.width - 864)
       camera.pos.x = this.pos.x - canvas.width / 2;
     if (this.pos.y <= 1024 && this.pos.y >= 384)
       camera.pos.y = this.pos.y - canvas.height / 2;
