@@ -8,13 +8,50 @@ const bufferCtx = buffer.getContext("2d");
 //ctx.imageSmoothingEnabled = false;
 const tileW = 32;
 const tileH = 32;
-
+const mapW = 546;
+const mapH = 44;
 //canvas.width = window.innerWidth;
 canvas.width = 1280;
 //canvas.height = 400;
 canvas.height = tileH * 22;
 buffer.width = tileW * 546;
-buffer.height = tileH * 45;
+buffer.height = tileH * 44;
+
+class Viewport {
+  constructor(pos, dim) {
+    this.pos = pos;
+    this.dim = dim;
+    this.bounds = { x1: 0, y1: 0, x2: 0, y2: 0 };
+    this.offset = { x: 0, y: 0 };
+  }
+
+  draw() {}
+
+  update(px, py) {
+    this.offset.x = this.dim.x / 2 - px;
+    this.offset.y = this.dim.y / 2 - py;
+
+    const tile = {
+      x: px - player.pos.x,
+      y: py - player.pos.y,
+    };
+
+    this.bounds.x1 = tile.x - this.dim.x / 2;
+    this.bounds.y1 = tile.y - this.dim.y / 2;
+
+    if (this.bounds.x1 < 0) this.bounds.x1 = 0;
+    if (this.bounds.y1 < 0) this.bounds.y1 = 0;
+
+    this.bounds.x2 = tile.x + this.dim.x / 2;
+    this.bounds.y2 = tile.y + this.dim.y / 2;
+
+    if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width - 32;
+    if (this.bounds.y2 >= buffer.height) this.bounds.y2 = buffer.height - 32;
+
+    //console.log(viewport);
+  }
+}
+
 class Camera {
   constructor(pos) {
     this.pos = pos;
@@ -23,17 +60,17 @@ class Camera {
   }
 
   draw() {
-    ctx.drawImage(
-      buffer,
-      this.pos.x,
-      this.pos.y,
-      canvas.width,
-      canvas.height,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
+    // ctx.drawImage(
+    //   buffer,
+    //   this.pos.x,
+    //   this.pos.y,
+    //   canvas.width,
+    //   canvas.height,
+    //   0,
+    //   0,
+    //   canvas.width,
+    //   canvas.height
+    // );
     // ctx.fillStyle = "black";
     // ctx.fillRect(0, 0, canvas.width, canvas.height);
     // ctx.lineWidth = 5;
@@ -65,32 +102,49 @@ class Player {
   draw() {
     ctx.fillStyle = "red";
     ctx.fillRect(
-      this.pos.x - camera.pos.x,
-      this.pos.y - camera.pos.y,
+      this.pos.x + viewport.offset.x,
+      this.pos.y + viewport.offset.y,
       this.w,
       this.h
     );
   }
 
   update() {
+    if (this.pos.x < 0) {
+      this.pos.x = 0;
+      this.vel.x = 0;
+    }
+    if (this.pos.x + player.w > buffer.width) {
+      this.pos.x = buffer.width - player.w;
+      this.vel.x = 0;
+    }
+    if (this.pos.y < 0) {
+      this.pos.y = 0;
+      this.vel.y = 0;
+    }
+    if (this.pos.y + player.h > buffer.height) {
+      this.pos.y = buffer.height - player.h;
+      this.vel.y = 0;
+    }
+
     this.pos.x += this.vel.x;
     this.pos.y += this.vel.y;
+    viewport.update(player.pos.x, player.pos.y);
+    // if (this.pos.x < 640) this.pos.x = 640;
+    // if (this.pos.x + this.w >= buffer.width) this.pos.x = buffer.width - this.w;
+    // if (this.pos.y <= tileH) this.pos.y = tileH;
+    // if (this.pos.y + this.h > buffer.height - tileH * 2)
+    //   this.pos.y = buffer.height - tileH * 2 - this.h;
 
-    if (this.pos.x < 640) this.pos.x = 640;
-    if (this.pos.x + this.w >= buffer.width) this.pos.x = buffer.width - this.w;
-    if (this.pos.y <= tileH) this.pos.y = tileH;
-    if (this.pos.y + this.h + tileH > buffer.height - tileH)
-      this.pos.y = buffer.height - tileH * 2 - this.h;
+    // camera.pos.x = this.pos.x;
+    // camera.pos.y = this.pos.y;
 
-    camera.pos.x = this.pos.x - canvas.width / 2;
-    camera.pos.y = this.pos.y - canvas.height / 2 - tileH;
-
-    if (camera.pos.y <= 0) camera.pos.y = 0;
-    if (camera.pos.y >= buffer.height / 2)
-      camera.pos.y = buffer.height / 2 + tileH / 2;
+    // if (camera.pos.y <= 0) camera.pos.y = 0;
+    // if (camera.pos.y >= buffer.height / 2)
+    //   camera.pos.y = buffer.height / 2 + tileH / 2;
     this.draw();
-    this.vel.x = 0;
-    this.vel.y = 0;
+    // this.vel.x = 0;
+    // this.vel.y = 0;
     //console.log(this.pos.x);
   }
 }
@@ -161,7 +215,23 @@ const level = parseJson("./map.json").then((m) => {
 });
 
 function animate() {
-  camera.update();
+  //camera.update();
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  console.log(player.pos.x, player.pos.y);
+  ctx.drawImage(
+    buffer,
+    viewport.bounds.x1 - viewport.offset.x,
+    viewport.bounds.y1 - viewport.offset.y,
+    canvas.width,
+    canvas.height,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+  // player.pos.x += viewport.offset.x;
+  // player.pos.y += viewport.offset.y;
 
   // ctx.fillStyle = "green";
   // ctx.fillRect(0, canvas.height - tileH, canvas.width, canvas.height);
@@ -178,7 +248,7 @@ function animate() {
   // ctx.lineTo(canvas.width, canvas.height);
   // ctx.lineWidth = 5;
   // ctx.stroke();
-
+  //console.log(viewport.offset.x, viewport.offset.y, player.pos.x, player.pos.y);
   player.update();
 
   // console.log({ CAMX: camera.pos.x, CAMY: camera.pos.y });
@@ -192,8 +262,12 @@ function animate() {
   window.requestAnimationFrame(animate);
 }
 
-const player = new Player({ x: 640, y: 384 }, { x: 0, y: 0 });
+const player = new Player({ x: 0, y: 0 }, { x: 0, y: 0 });
 const camera = new Camera({ x: 0, y: 0 });
+const viewport = new Viewport(
+  { x: 0, y: 0 },
+  { x: canvas.width, y: canvas.height }
+);
 window.camera = camera;
 animate();
 window.level = level;
@@ -237,11 +311,11 @@ window.addEventListener("keydown", (e) => {
     }
   }
 
-  console.log(
-    { CX: camera.pos.x, CY: camera.pos.y },
-    { PX: player.pos.x, PY: player.pos.y },
-    { BW: buffer.width, BH: buffer.height }
-  );
+  // console.log(
+  //   { CX: camera.pos.x, CY: camera.pos.y },
+  //   { PX: player.pos.x, PY: player.pos.y },
+  //   { BW: buffer.width, BH: buffer.height }
+  // );
   //console.log(e.code);
 });
 // window.addEventListener("resize", (e) => {
