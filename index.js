@@ -12,12 +12,14 @@ const tileH = 32;
 //canvas.width = window.innerWidth;
 canvas.width = 1280;
 //canvas.height = 400;
-canvas.height = tileH * 24;
+canvas.height = tileH * 22;
 buffer.width = tileW * 546;
-buffer.height = tileH * 47;
+buffer.height = tileH * 45;
 class Camera {
   constructor(pos) {
     this.pos = pos;
+    this.w = canvas.width;
+    this.h = canvas.height;
   }
 
   draw() {
@@ -45,7 +47,7 @@ class Camera {
     // ctx.lineTo(canvas.width, canvas.height - 100);
     // ctx.moveTo(0, 1024);
     // ctx.lineTo(canvas.width, 1024);
-    ctx.stroke();
+    //ctx.stroke();
   }
   update() {
     this.draw();
@@ -75,18 +77,20 @@ class Player {
     this.pos.y += this.vel.y;
 
     if (this.pos.x < 640) this.pos.x = 640;
-    if (this.pos.x > 17250) this.pos.x = 17250;
+    if (this.pos.x + this.w >= buffer.width) this.pos.x = buffer.width - this.w;
+    if (this.pos.y <= tileH) this.pos.y = tileH;
+    if (this.pos.y + this.h > buffer.height - tileH * 2)
+      this.pos.y = buffer.height - tileH * 2 - this.h;
 
-    if (this.pos.y < tileH) this.pos.y = tileH;
-    if (this.pos.y > 1248) this.pos.y = 1248;
+    camera.pos.x = this.pos.x - canvas.width / 2;
+    camera.pos.y = this.pos.y - canvas.height / 2 - tileH;
 
-    if (this.pos.x >= 640 && this.pos.x < buffer.width - 864)
-      camera.pos.x = this.pos.x - canvas.width / 2;
-    if (this.pos.y <= 1120 && this.pos.y >= 384)
-      camera.pos.y = this.pos.y - canvas.height / 2;
+    if (camera.pos.y <= 0) camera.pos.y = 0;
+    if (camera.pos.y >= buffer.height / 2)
+      camera.pos.y = buffer.height / 2 + tileH / 2;
     this.draw();
-    this.vel.x = 0;
-    this.vel.y = 0;
+    // this.vel.x = 0;
+    // this.vel.y = 0;
     //console.log(this.pos.x);
   }
 }
@@ -161,19 +165,19 @@ function animate() {
 
   // ctx.fillStyle = "green";
   // ctx.fillRect(0, canvas.height - tileH, canvas.width, canvas.height);
-  ctx.beginPath();
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "white";
-  ctx.moveTo(0, buffer.height / 2);
-  ctx.lineTo(canvas.width, buffer.height / 2);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "purple";
-  ctx.moveTo(0, canvas.height);
-  ctx.lineTo(canvas.width, canvas.height);
-  ctx.lineWidth = 5;
-  ctx.stroke();
+  // ctx.beginPath();
+  // ctx.lineWidth = 5;
+  // ctx.strokeStyle = "white";
+  // ctx.moveTo(0, buffer.height / 2);
+  // ctx.lineTo(canvas.width, buffer.height / 2);
+  // ctx.stroke();
+  // ctx.beginPath();
+  // ctx.lineWidth = 5;
+  // ctx.strokeStyle = "purple";
+  // ctx.moveTo(0, canvas.height);
+  // ctx.lineTo(canvas.width, canvas.height);
+  // ctx.lineWidth = 5;
+  // ctx.stroke();
 
   player.update();
 
@@ -184,11 +188,7 @@ function animate() {
   //   PLYCAMVELX: player.pos.x - camera.pos.x,
   // });
   //console.log(camera.scrollBounds.y1);
-  console.log(
-    { CX: camera.pos.x, CY: camera.pos.y },
-    { PX: player.pos.x, PY: player.pos.y },
-    { BW: buffer.width, BH: buffer.height }
-  );
+
   window.requestAnimationFrame(animate);
 }
 
@@ -236,6 +236,12 @@ window.addEventListener("keydown", (e) => {
       player.vel.y = -32;
     }
   }
+
+  console.log(
+    { CX: camera.pos.x, CY: camera.pos.y },
+    { PX: player.pos.x, PY: player.pos.y },
+    { BW: buffer.width, BH: buffer.height }
+  );
   //console.log(e.code);
 });
 // window.addEventListener("resize", (e) => {
