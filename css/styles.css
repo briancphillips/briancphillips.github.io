@@ -1,22 +1,23 @@
 * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: black;
-  }
-  div.container {
-   display: flex;
-   justify-content: center;
-   align-items: top;
-   /* height: 768px; */
-    /* width: 100vw; */
-    /* height: 100vh;     */
-    overflow: hidden;          
-  }
-  canvas {
-    
-    
-    
-  }
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+}
+div.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+
+  overflow: hidden;
+}
+canvas {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+  overflow: hidden;
+}

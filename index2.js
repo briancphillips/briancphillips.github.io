@@ -39,7 +39,8 @@ class Camera {
   update(px, py) {
     this.offset.x = Math.floor(this.dim.x / 2 - px);
     this.offset.y = Math.floor(this.dim.y / 2 - py);
-
+    this.pos.x = this.offset.x;
+    this.pos.y = this.offset.y;
     const tile = {
       x: px - player.pos.x,
       y: py - player.pos.y,
@@ -56,6 +57,7 @@ class Camera {
 
     if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width - 32;
     if (this.bounds.y2 >= buffer.height) this.bounds.y2 = buffer.height - 32;
+    console.log(this.pos.x, this.pos.y);
     this.draw();
     //console.log(camera);
   }
@@ -99,7 +101,7 @@ class Player {
       this.vel.y = 0;
     }
     camera.update(this.pos.x, this.pos.y);
-
+    //console.log(this.pos.x, this.pos.y);
     this.vel.x = 0;
     this.vel.y = 0;
     this.draw();
@@ -220,7 +222,7 @@ window.addEventListener("keydown", (e) => {
     }
   }
 
-  console.log(camera);
+  //console.log(camera);
 });
 // window.addEventListener("resize", (e) => {
 //   canvas.width = window.innerWidth;

@@ -14,7 +14,7 @@ canvas.width = 1280;
 //canvas.height = 400;
 canvas.height = tileH * 22;
 buffer.width = tileW * 546;
-buffer.height = tileH * 45;
+buffer.height = tileH * 44;
 class Camera {
   constructor(pos) {
     this.pos = pos;
@@ -80,17 +80,16 @@ class Player {
     if (this.pos.x + this.w >= buffer.width) this.pos.x = buffer.width - this.w;
     if (this.pos.y <= tileH) this.pos.y = tileH;
     if (this.pos.y + this.h + tileH > buffer.height - tileH)
-      this.pos.y = buffer.height - tileH * 2 - this.h;
+      this.pos.y = buffer.height - tileH - this.h;
 
     camera.pos.x = this.pos.x - canvas.width / 2;
     camera.pos.y = this.pos.y - canvas.height / 2 - tileH;
 
     if (camera.pos.y <= 0) camera.pos.y = 0;
-    if (camera.pos.y >= buffer.height / 2)
-      camera.pos.y = buffer.height / 2 + tileH / 2;
+    if (camera.pos.y >= buffer.height / 2) camera.pos.y = buffer.height / 2;
     this.draw();
-    // this.vel.x = 0;
-    // this.vel.y = 0;
+    this.vel.x = 0;
+    this.vel.y = 0;
     //console.log(this.pos.x);
   }
 }
