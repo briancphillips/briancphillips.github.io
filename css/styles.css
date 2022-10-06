@@ -4,15 +4,17 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: black;
 }
 div.container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-
+  background-color: black;
   overflow: hidden;
+}
+div.editor {
+  background-color: white;
 }
 canvas {
   display: flex;
@@ -20,4 +22,7 @@ canvas {
   align-items: center;
   height: 90vh;
   overflow: hidden;
+}
+pre {
+  color: white;
 }
