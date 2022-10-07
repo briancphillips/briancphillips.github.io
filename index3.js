@@ -98,8 +98,8 @@ class Player {
     if (this.pos.y + this.h + tileH > buffer.height - tileH)
       this.pos.y = buffer.height - tileH - this.h;
 
-    camera.pos.x = this.pos.x - canvas.width / 2;
-    camera.pos.y = this.pos.y - canvas.height / 2;
+    camera.pos.x = this.pos.x - canvas.width / 2 + tileW / 2;
+    camera.pos.y = this.pos.y - canvas.height / 2 + tileH / 2;
 
     if (camera.pos.y <= 0) camera.pos.y = 0;
     if (camera.pos.y >= buffer.height / 2) camera.pos.y = buffer.height / 2;
