@@ -104,8 +104,8 @@ class Player {
     if (camera.pos.y <= 0) camera.pos.y = 0;
     if (camera.pos.y >= buffer.height / 2) camera.pos.y = buffer.height / 2;
     this.draw();
-    // this.vel.x = 0;
-    // this.vel.y = 0;
+    this.vel.x = 0;
+    this.vel.y = 0;
     //console.log(this.pos.x);
   }
 }
