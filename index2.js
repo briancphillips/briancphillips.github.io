@@ -10,9 +10,9 @@ const mapW = 546;
 const mapH = 44;
 
 canvas.width = 1280;
-canvas.height = tileH * 22;
+canvas.height = tileH * 21;
 buffer.width = tileW * 546;
-buffer.height = tileH * 44;
+buffer.height = tileH * 42;
 
 class Camera {
   constructor(pos, dim) {
@@ -55,8 +55,9 @@ class Camera {
     this.bounds.x2 = tile.x + this.dim.x / 2;
     this.bounds.y2 = tile.y + this.dim.y / 2;
 
-    if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width - 32;
-    if (this.bounds.y2 >= buffer.height) this.bounds.y2 = buffer.height - 32;
+    if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width;
+    // if (this.bounds.y2 >= buffer.height - tileH)
+    //   this.bounds.y2 = buffer.height + tileH;
     console.log(this.pos.x, this.pos.y);
     this.draw();
     //console.log(camera);
@@ -88,8 +89,8 @@ class Player {
       this.pos.x = 640;
       this.vel.x = 0;
     }
-    if (this.pos.x + this.w > buffer.width - tileW) {
-      this.pos.x = buffer.width - this.w - tileW;
+    if (this.pos.x + this.w > buffer.width) {
+      this.pos.x = buffer.width - this.w;
       this.vel.x = 0;
     }
     if (this.pos.y < tileH) {
@@ -173,7 +174,7 @@ function animate() {
   window.requestAnimationFrame(animate);
 }
 
-const player = new Player({ x: 640, y: 384 }, { x: 0, y: 0 });
+const player = new Player({ x: 640, y: 384 - 64 }, { x: 0, y: 0 });
 
 const camera = new Camera(
   { x: 0, y: 0 },

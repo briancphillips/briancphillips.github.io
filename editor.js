@@ -17,6 +17,100 @@ buffer.width = tileW * 546;
 buffer.height = tileH * 42;
 
 canvas.setAttribute("style", "background-color:black");
+class Camera {
+  constructor(pos, dim) {
+    this.pos = pos;
+    this.dim = dim;
+    this.bounds = { x1: 0, y1: 0, x2: 0, y2: 0 };
+    this.offset = { x: 0, y: 0 };
+  }
+
+  draw() {
+    ctx.drawImage(
+      buffer,
+      camera.bounds.x1 - camera.offset.x,
+      camera.bounds.y1 - camera.offset.y,
+      canvas.width,
+      canvas.height,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+  }
+
+  update(px, py) {
+    this.offset.x = Math.floor(this.dim.x / 2 - px);
+    this.offset.y = Math.floor(this.dim.y / 2 - py);
+    this.pos.x = this.offset.x;
+    this.pos.y = this.offset.y;
+    const tile = {
+      x: px - player.pos.x,
+      y: py - player.pos.y,
+    };
+
+    this.bounds.x1 = tile.x - this.dim.x / 2;
+    this.bounds.y1 = tile.y - this.dim.y / 2;
+
+    if (this.bounds.x1 < 0) this.bounds.x1 = 0;
+    if (this.bounds.y1 < 0) this.bounds.y1 = 0;
+
+    this.bounds.x2 = tile.x + this.dim.x / 2;
+    this.bounds.y2 = tile.y + this.dim.y / 2;
+
+    if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width;
+    // if (this.bounds.y2 >= buffer.height - tileH)
+    //   this.bounds.y2 = buffer.height + tileH;
+    console.log(this.pos.x, this.pos.y);
+    this.draw();
+    //console.log(camera);
+  }
+}
+
+// class Player {
+//   constructor(pos, vel) {
+//     this.pos = pos;
+//     this.vel = vel;
+//     this.prev = this.vel;
+//     this.w = 96;
+//     this.h = 128;
+//   }
+//   draw() {
+//     ctx.fillStyle = "red";
+//     ctx.fillRect(
+//       this.pos.x + camera.offset.x,
+//       this.pos.y + camera.offset.y,
+//       this.w,
+//       this.h
+//     );
+//   }
+
+//   update() {
+//     this.pos.x += this.vel.x;
+//     this.pos.y += this.vel.y;
+//     if (this.pos.x < 640) {
+//       this.pos.x = 640;
+//       this.vel.x = 0;
+//     }
+//     if (this.pos.x + this.w > buffer.width) {
+//       this.pos.x = buffer.width - this.w;
+//       this.vel.x = 0;
+//     }
+//     if (this.pos.y < tileH) {
+//       this.pos.y = tileH;
+//       this.vel.y = 0;
+//     }
+//     if (this.pos.y + this.h > buffer.height - tileH) {
+//       this.pos.y = buffer.height - this.h - tileH;
+//       this.vel.y = 0;
+//     }
+//     camera.update(this.pos.x, this.pos.y);
+//     //console.log(this.pos.x, this.pos.y);
+//     this.vel.x = 0;
+//     this.vel.y = 0;
+//     this.draw();
+//   }
+// }
 
 let rect1x,
   rect1y,
@@ -121,8 +215,8 @@ function getMousePos(evt) {
   //     y: Math.ceil((evt.clientY - rect.top) / tileH),
   //   };
   return {
-    x: Math.floor(Math.abs(evt.clientX - rect.left) / tileW),
-    y: Math.floor(Math.abs(evt.clientY - rect.top) / tileH),
+    x: Math.floor(Math.round(evt.clientX - rect.left) / tileW),
+    y: Math.floor(Math.round(evt.clientY - rect.top) / tileH),
   };
 }
 
@@ -130,12 +224,12 @@ function update() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(
     buffer,
-    0,
-    0,
+    rect1x * tileW,
+    rect1y * tileH,
     canvas.width,
     canvas.height,
-    rect1x,
-    rect1y,
+    0,
+    0,
     canvas.width,
     canvas.height
   );
@@ -144,14 +238,14 @@ function update() {
   window.requestAnimationFrame(update);
 }
 update();
-
+window.rect1x = rect1x;
 canvas.addEventListener("mousemove", (e) => {
   let a = canvas.getBoundingClientRect().left;
   let b = canvas.getBoundingClientRect().top;
   if (MOUSE_DOWN) {
     let mousePosition = getMousePos(e);
-    rect1x = mousePosition.x;
-    rect1y = mousePosition.y;
+    rect1x = rect1x + e.movementX;
+    rect1y = rect1y + e.movementY;
     rect2x = mousePosition.x;
     rect2y = mousePosition.y;
 
@@ -180,9 +274,9 @@ canvas.addEventListener("mousedown", (e) => {
   let a = canvas.getBoundingClientRect().left;
   let b = canvas.getBoundingClientRect().top;
   let mousePosition = getMousePos(e);
-  rect1x = mousePosition.x;
-  rect1y = mousePosition.y;
-  rect2x = mousePosition.x;
-  rect2y = mousePosition.y;
+  // rect1x = mousePosition.x;
+  // rect1y = mousePosition.y;
+  // rect2x = mousePosition.x;
+  // rect2y = mousePosition.y;
   //console.log(getMousePos(e));
 });
