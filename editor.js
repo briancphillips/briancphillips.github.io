@@ -112,9 +112,9 @@ class Camera {
 //   }
 // }
 
-let rect1x,
-  rect1y,
-  rect2x,
+let rect1x = 0,
+  rect1y = 0,
+  rect2x = 0,
   rect2y = 0;
 
 let MOUSE_DOWN = false;
@@ -235,6 +235,7 @@ function update() {
   );
   //ctx.fillRect(rect1x, rect1y, rect2x - rect1x, rect2y - rect1y);
   drawGrid();
+  console.log(rect1x, rect1y);
   window.requestAnimationFrame(update);
 }
 update();
@@ -244,25 +245,23 @@ canvas.addEventListener("mousemove", (e) => {
   let b = canvas.getBoundingClientRect().top;
   if (MOUSE_DOWN) {
     let mousePosition = getMousePos(e);
-    rect1x = rect1x + e.movementX;
-    rect1y = rect1y + e.movementY;
+    rect1x = rect1x - e.movementX;
+    rect1y = rect1y - e.movementY;
     rect2x = mousePosition.x;
     rect2y = mousePosition.y;
+    if (rect1x < 0) rect1x = 0;
+    if (rect1x > buffer.width / tileW - canvas.width / tileW)
+      rect1x = buffer.width / tileW - canvas.width / tileW;
 
+    if (rect1y < 0) rect1y = 0;
+    if (rect1y > buffer.height / tileH - canvas.height / tileH)
+      rect1y = buffer.height / tileH - canvas.height / tileH;
     //console.log(getMousePos(e));
   }
 });
 
 canvas.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
-  let a = canvas.getBoundingClientRect().left;
-  let b = canvas.getBoundingClientRect().top;
-  let mousePosition = getMousePos(e);
-  rect1x = mousePosition.x;
-  rect1y = mousePosition.y;
-  rect2x = mousePosition.x;
-  rect2y = mousePosition.y;
-  //console.log(e.target);
 });
 
 canvas.addEventListener("mousedown", (e) => {
@@ -271,12 +270,29 @@ canvas.addEventListener("mousedown", (e) => {
   } else {
     MOUSE_DOWN = true;
   }
-  let a = canvas.getBoundingClientRect().left;
-  let b = canvas.getBoundingClientRect().top;
-  let mousePosition = getMousePos(e);
-  // rect1x = mousePosition.x;
-  // rect1y = mousePosition.y;
-  // rect2x = mousePosition.x;
-  // rect2y = mousePosition.y;
-  //console.log(getMousePos(e));
 });
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "ArrowLeft") {
+    rect1x = rect1x - 1;
+  }
+  if (e.code === "ArrowRight") {
+    rect1x = rect1x + 1;
+  }
+  if (e.code === "ArrowUp") {
+    rect1y = rect1y - 1;
+  }
+  if (e.code === "ArrowDown") {
+    rect1y = rect1y + 1;
+  }
+  if (rect1x < 0) rect1x = 0;
+  if (rect1x > buffer.width / tileW - canvas.width / tileW)
+    rect1x = buffer.width / tileW - canvas.width / tileW;
+
+  if (rect1y < 0) rect1y = 0;
+  if (rect1y > buffer.height / tileH - canvas.height / tileH)
+    rect1y = buffer.height / tileH - canvas.height / tileH;
+  console.log(e);
+});
+
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());

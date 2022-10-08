@@ -14,7 +14,7 @@ div.container {
   overflow: hidden;
 }
 div.editor {
-  background-color: white;
+  background-color: black;
 }
 canvas {
   display: flex;
@@ -22,6 +22,7 @@ canvas {
   align-items: center;
   height: 90vh;
   overflow: hidden;
+  cursor: pointer;
 }
 pre {
   color: white;
