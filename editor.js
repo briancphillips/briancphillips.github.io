@@ -8,7 +8,7 @@ const bufferCtx = buffer.getContext("2d");
 //ctx.imageSmoothingEnabled = false;
 const tileW = 32;
 const tileH = 32;
-
+let scale = 1;
 //canvas.width = window.innerWidth;
 canvas.width = 1280;
 //canvas.height = 400;
@@ -296,3 +296,22 @@ window.addEventListener("keydown", (e) => {
 });
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+document.getElementById("btnScaleUp").addEventListener("click", (e) => {
+  ctx.restore();
+  if (scale < 4) scale += 1;
+
+  scaleCanvas(scale);
+});
+document.getElementById("btnScaleDown").addEventListener("click", (e) => {
+  ctx.restore();
+  if (scale > 1) scale -= 1;
+
+  scaleCanvas(scale);
+});
+
+function scaleCanvas(scale) {
+  ctx.scale(1, 1);
+  ctx.save();
+  ctx.scale(scale, scale);
+}
