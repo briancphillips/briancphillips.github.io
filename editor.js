@@ -6,8 +6,8 @@ const bufferCtx = buffer.getContext("2d");
 
 //canvas.setAttribute("style", "transform:scale(2,2)");
 //ctx.imageSmoothingEnabled = false;
-const tileW = 32;
-const tileH = 32;
+let tileW = 32;
+let tileH = 32;
 let scale = 1;
 let mouseX, mouseY;
 //canvas.width = window.innerWidth;
@@ -237,8 +237,8 @@ function update() {
   //ctx.fillRect(rect1x, rect1y, rect2x - rect1x, rect2y - rect1y);
   drawGrid();
   highlightCell({
-    x: mouseX * tileW,
-    y: mouseY * tileH,
+    x: Math.ceil((mouseX * tileW) / scale),
+    y: Math.ceil((mouseY * tileH) / scale),
   });
 
   window.requestAnimationFrame(update);
@@ -251,7 +251,7 @@ canvas.addEventListener("mousemove", (e) => {
 
   mouseX = mousePosition.x;
   mouseY = mousePosition.y;
-  console.log(mouseX, mouseY);
+  //console.log(mouseX, mouseY);
   if (MOUSE_DOWN) {
     rect1x = rect1x - e.movementX;
     rect1y = rect1y - e.movementY;
@@ -265,7 +265,7 @@ canvas.addEventListener("mousemove", (e) => {
     if (rect1y > buffer.height / tileH - canvas.height / tileH)
       rect1y = buffer.height / tileH - canvas.height / tileH;
 
-    //console.log(getMousePos(e));
+    console.log(rect1x, rect1y);
   }
 });
 
@@ -273,11 +273,16 @@ canvas.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
 });
 
+canvas.addEventListener("mouseleave", (e) => {
+  MOUSE_DOWN = false;
+});
+
 canvas.addEventListener("mousedown", (e) => {
+  //console.log("button " + e.button);
   if (MOUSE_DOWN) {
     MOUSE_DOWN = false;
   } else {
-    MOUSE_DOWN = true;
+    if (e.button === 1) MOUSE_DOWN = true;
   }
 });
 
@@ -330,5 +335,29 @@ function scaleCanvas(scale) {
 
 function highlightCell(pos) {
   ctx.fillStyle = "rgba(255,0,0,.2)";
-  ctx.fillRect(pos.x, pos.y, tileW, tileH);
+  ctx.fillRect(
+    Math.floor(pos.x / 32) * 32,
+    Math.floor(pos.y / 32) * 32,
+    tileW,
+    tileH
+  );
 }
+
+window.addEventListener("resize", (e) => {
+  const cs = getComputedStyle(canvas);
+  const width = parseInt(cs.getPropertyValue("width"), 10);
+  const height = parseInt(cs.getPropertyValue("height"), 10);
+
+  canvas.width = width;
+  canvas.height = height;
+  console.log(width, height);
+});
+window.addEventListener("load", (e) => {
+  const cs = getComputedStyle(canvas);
+  const width = parseInt(cs.getPropertyValue("width"), 10);
+  const height = parseInt(cs.getPropertyValue("height"), 10);
+
+  canvas.width = width;
+  canvas.height = height;
+  console.log(tileW, tileH);
+});
