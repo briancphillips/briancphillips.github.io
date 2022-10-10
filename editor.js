@@ -9,6 +9,7 @@ const bufferCtx = buffer.getContext("2d");
 const tileW = 32;
 const tileH = 32;
 let scale = 1;
+let mouseX, mouseY;
 //canvas.width = window.innerWidth;
 canvas.width = 1280;
 //canvas.height = 400;
@@ -61,7 +62,7 @@ class Camera {
     if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width;
     // if (this.bounds.y2 >= buffer.height - tileH)
     //   this.bounds.y2 = buffer.height + tileH;
-    console.log(this.pos.x, this.pos.y);
+    //console.log(this.pos.x, this.pos.y);
     this.draw();
     //console.log(camera);
   }
@@ -141,7 +142,7 @@ async function parseJson(url) {
     const json_data = await loadJson(url);
     return json_data;
   } catch (e) {
-    console.log(e);
+    //console.log(e);
   }
 }
 
@@ -221,7 +222,7 @@ function getMousePos(evt) {
 }
 
 function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(
     buffer,
     rect1x * tileW,
@@ -235,16 +236,23 @@ function update() {
   );
   //ctx.fillRect(rect1x, rect1y, rect2x - rect1x, rect2y - rect1y);
   drawGrid();
-  console.log(rect1x, rect1y);
+  highlightCell({
+    x: mouseX * tileW,
+    y: mouseY * tileH,
+  });
+
   window.requestAnimationFrame(update);
 }
 update();
 window.rect1x = rect1x;
+
 canvas.addEventListener("mousemove", (e) => {
-  let a = canvas.getBoundingClientRect().left;
-  let b = canvas.getBoundingClientRect().top;
+  let mousePosition = getMousePos(e);
+
+  mouseX = mousePosition.x;
+  mouseY = mousePosition.y;
+  console.log(mouseX, mouseY);
   if (MOUSE_DOWN) {
-    let mousePosition = getMousePos(e);
     rect1x = rect1x - e.movementX;
     rect1y = rect1y - e.movementY;
     rect2x = mousePosition.x;
@@ -256,6 +264,7 @@ canvas.addEventListener("mousemove", (e) => {
     if (rect1y < 0) rect1y = 0;
     if (rect1y > buffer.height / tileH - canvas.height / tileH)
       rect1y = buffer.height / tileH - canvas.height / tileH;
+
     //console.log(getMousePos(e));
   }
 });
@@ -292,16 +301,19 @@ window.addEventListener("keydown", (e) => {
   if (rect1y < 0) rect1y = 0;
   if (rect1y > buffer.height / tileH - canvas.height / tileH)
     rect1y = buffer.height / tileH - canvas.height / tileH;
-  console.log(e);
+  //console.log(e);
 });
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
 document.getElementById("btnScaleUp").addEventListener("click", (e) => {
+  if (scale > 4) return;
   ctx.restore();
-  if (scale < 4) scale += 1;
+  // ctx.translate(1000, 1000);
+  scale += 1;
 
   scaleCanvas(scale);
+  // ctx.translate(-1, -1);
 });
 document.getElementById("btnScaleDown").addEventListener("click", (e) => {
   ctx.restore();
@@ -314,4 +326,9 @@ function scaleCanvas(scale) {
   ctx.scale(1, 1);
   ctx.save();
   ctx.scale(scale, scale);
+}
+
+function highlightCell(pos) {
+  ctx.fillStyle = "rgba(255,0,0,.2)";
+  ctx.fillRect(pos.x, pos.y, tileW, tileH);
 }
