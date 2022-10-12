@@ -18,55 +18,55 @@ buffer.width = tileW * 546;
 buffer.height = tileH * 42;
 
 canvas.setAttribute("style", "background-color:black");
-class Camera {
-  constructor(pos, dim) {
-    this.pos = pos;
-    this.dim = dim;
-    this.bounds = { x1: 0, y1: 0, x2: 0, y2: 0 };
-    this.offset = { x: 0, y: 0 };
-  }
+// class Camera {
+//   constructor(pos, dim) {
+//     this.pos = pos;
+//     this.dim = dim;
+//     this.bounds = { x1: 0, y1: 0, x2: 0, y2: 0 };
+//     this.offset = { x: 0, y: 0 };
+//   }
 
-  draw() {
-    ctx.drawImage(
-      buffer,
-      camera.bounds.x1 - camera.offset.x,
-      camera.bounds.y1 - camera.offset.y,
-      canvas.width,
-      canvas.height,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-  }
+//   draw() {
+//     ctx.drawImage(
+//       buffer,
+//       camera.bounds.x1 - camera.offset.x,
+//       camera.bounds.y1 - camera.offset.y,
+//       canvas.width,
+//       canvas.height,
+//       0,
+//       0,
+//       canvas.width,
+//       canvas.height
+//     );
+//   }
 
-  update(px, py) {
-    this.offset.x = Math.floor(this.dim.x / 2 - px);
-    this.offset.y = Math.floor(this.dim.y / 2 - py);
-    this.pos.x = this.offset.x;
-    this.pos.y = this.offset.y;
-    const tile = {
-      x: px - player.pos.x,
-      y: py - player.pos.y,
-    };
+//   update(px, py) {
+//     this.offset.x = Math.floor(this.dim.x / 2 - px);
+//     this.offset.y = Math.floor(this.dim.y / 2 - py);
+//     this.pos.x = this.offset.x;
+//     this.pos.y = this.offset.y;
+//     const tile = {
+//       x: px - player.pos.x,
+//       y: py - player.pos.y,
+//     };
 
-    this.bounds.x1 = tile.x - this.dim.x / 2;
-    this.bounds.y1 = tile.y - this.dim.y / 2;
+//     this.bounds.x1 = tile.x - this.dim.x / 2;
+//     this.bounds.y1 = tile.y - this.dim.y / 2;
 
-    if (this.bounds.x1 < 0) this.bounds.x1 = 0;
-    if (this.bounds.y1 < 0) this.bounds.y1 = 0;
+//     if (this.bounds.x1 < 0) this.bounds.x1 = 0;
+//     if (this.bounds.y1 < 0) this.bounds.y1 = 0;
 
-    this.bounds.x2 = tile.x + this.dim.x / 2;
-    this.bounds.y2 = tile.y + this.dim.y / 2;
+//     this.bounds.x2 = tile.x + this.dim.x / 2;
+//     this.bounds.y2 = tile.y + this.dim.y / 2;
 
-    if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width;
-    // if (this.bounds.y2 >= buffer.height - tileH)
-    //   this.bounds.y2 = buffer.height + tileH;
-    //console.log(this.pos.x, this.pos.y);
-    this.draw();
-    //console.log(camera);
-  }
-}
+//     if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width;
+//     // if (this.bounds.y2 >= buffer.height - tileH)
+//     //   this.bounds.y2 = buffer.height + tileH;
+//     //console.log(this.pos.x, this.pos.y);
+//     this.draw();
+//     //console.log(camera);
+//   }
+// }
 
 // class Player {
 //   constructor(pos, vel) {
@@ -304,27 +304,31 @@ window.addEventListener("keydown", (e) => {
     rect1x = buffer.width / tileW - canvas.width / tileW;
 
   if (rect1y < 0) rect1y = 0;
-  if (rect1y > buffer.height / tileH - canvas.height / tileH)
-    rect1y = buffer.height / tileH - canvas.height / tileH;
+  if (rect1y > buffer.height / tileH - canvas.height / scale / tileH)
+    rect1y = buffer.height / tileH - canvas.height / scale / tileH;
   //console.log(e);
+  console.log(rect1x, rect1y);
 });
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
 document.getElementById("btnScaleUp").addEventListener("click", (e) => {
   if (scale > 4) return;
-  ctx.restore();
-  // ctx.translate(1000, 1000);
-  scale += 1;
 
+  ctx.restore();
+  ctx.translate(canvas.width / 4, canvas.height / 4);
+  scale += 5 / 3;
+  ctx.translate(-canvas.width / 4, -canvas.height / 4);
   scaleCanvas(scale);
+  //drawGrid();
   // ctx.translate(-1, -1);
 });
 document.getElementById("btnScaleDown").addEventListener("click", (e) => {
   ctx.restore();
-  if (scale > 1) scale -= 1;
+  if (scale > 5 / 3) scale -= 5 / 3;
 
   scaleCanvas(scale);
+  //drawGrid();
 });
 
 function scaleCanvas(scale) {
@@ -350,6 +354,7 @@ window.addEventListener("resize", (e) => {
 
   canvas.width = width;
   canvas.height = height;
+  //drawGrid();
   console.log(width, height);
 });
 window.addEventListener("load", (e) => {
