@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Zooming process using scale and trsnslate</title>
+    <style>
+      #canvas {
+        border: 2px solid black;
+      }
+      h1 {
+        color: green;
+      }
+    </style>
+  </head>
+
+  <body>
+    <center>
+      <h1>GeeksforGeeks</h1>
+      <p>Scroll your mouse inside the canvas</p>
+      <canvas id="canvas" width="600" height="200"></canvas>
+    </center>
+    <script>
+      var zoomIntensity = 0.1;
+
+      var canvas = document.getElementById("canvas");
+      var context = canvas.getContext("2d");
+      var width = 600;
+      var height = 200;
+
+      var scale = 1;
+      var orgnx = 0;
+      var orgny = 0;
+      var visibleWidth = width;
+      var visibleHeight = height;
+
+      function draw() {
+        context.fillStyle = "white";
+        context.fillRect(orgnx, orgny, 800 / scale, 800 / scale);
+        context.fillStyle = "green";
+        context.fillRect(250, 50, 100, 100);
+      }
+      setInterval(draw, 800 / 60);
+
+      // Scroll effect function
+      canvas.onwheel = function (event) {
+        event.preventDefault();
+        var x = event.clientX - canvas.offsetLeft;
+        var y = event.clientY - canvas.offsetTop;
+        var scroll = event.deltaY < 0 ? 1 : -2;
+
+        var zoom = Math.exp(scroll * zoomIntensity);
+
+        context.translate(orgnx, orgny);
+
+        orgnx -= x / (scale * zoom) - x / scale;
+        orgny -= y / (scale * zoom) - y / scale;
+
+        context.scale(zoom, zoom);
+        context.translate(-orgnx, -orgny);
+
+        // Updating scale and visisble width and height
+        scale *= zoom;
+        visibleWidth = width / scale;
+        visibleHeight = height / scale;
+      };
+    </script>
+  </body>
+</html>

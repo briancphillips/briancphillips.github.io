@@ -9,8 +9,6 @@ const bufferCtx = buffer.getContext("2d");
 let tileW = 32;
 let tileH = 32;
 let scale = 1;
-let scaleFactor = 40 / 21;
-let scaleAmt = 1;
 let mouseX, mouseY;
 //canvas.width = window.innerWidth;
 canvas.width = 1280;
@@ -306,45 +304,36 @@ window.addEventListener("keydown", (e) => {
     rect1x = buffer.width / tileW - canvas.width / tileW;
 
   if (rect1y < 0) rect1y = 0;
-  if (rect1y > buffer.height / tileH - canvas.height / tileH)
-    rect1y = buffer.height / tileH - canvas.height / tileH;
+  if (rect1y > buffer.height / tileH - canvas.height / scale / tileH)
+    rect1y = buffer.height / tileH - canvas.height / scale / tileH;
   //console.log(e);
-  console.log(rect1y, buffer.height / tileH - canvas.height / tileH);
+  console.log(rect1x, rect1y);
 });
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
 document.getElementById("btnScaleUp").addEventListener("click", (e) => {
-  scaleAmt += 1;
-  if (scaleAmt > 4) {
-    scaleAmt = 4;
-    return;
-  }
+  if (scale > 4) return;
 
-  ctx.translate(canvas.width / 2, canvas.height / 2);
-  scaleCanvas(scaleFactor);
-  ctx.translate(-canvas.width / 2, -canvas.height / 2);
-
+  ctx.restore();
+  ctx.translate(canvas.width / 4, canvas.height / 4);
+  scale += 5 / 3;
+  ctx.translate(-canvas.width / 4, -canvas.height / 4);
+  scaleCanvas(scale);
   //drawGrid();
   // ctx.translate(-1, -1);
-  console.log({ scaleFactor: scaleFactor });
 });
 document.getElementById("btnScaleDown").addEventListener("click", (e) => {
-  scaleAmt -= 1;
-  if (scaleAmt < 1) {
-    scaleAmt = 1;
-    return;
-  }
+  ctx.restore();
+  if (scale > 5 / 3) scale -= 5 / 3;
 
-  ctx.translate(canvas.width / 2, canvas.height / 2);
-  scaleCanvas(1 / scaleFactor);
-  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  scaleCanvas(scale);
   //drawGrid();
 });
 
 function scaleCanvas(scale) {
-  //ctx.scale(1, 1);
-
+  ctx.scale(1, 1);
+  ctx.save();
   ctx.scale(scale, scale);
 }
 
@@ -356,7 +345,6 @@ function highlightCell(pos) {
     tileW,
     tileH
   );
-  console.log(pos);
 }
 
 window.addEventListener("resize", (e) => {
