@@ -17,7 +17,16 @@ canvas.height = tileH * 21;
 buffer.width = tileW * 546;
 buffer.height = tileH * 42;
 
+let cols = 546;
+let rows = 42;
+
 canvas.setAttribute("style", "background-color:black");
+class Camera {
+  constructor() {
+    this.offsetX = 0;
+    this.offsetY = 0;
+  }
+}
 // class Camera {
 //   constructor(pos, dim) {
 //     this.pos = pos;
@@ -220,12 +229,13 @@ function getMousePos(evt) {
     y: Math.floor(Math.round(evt.clientY - rect.top) / tileH),
   };
 }
-
+const camera = new Camera();
+window.camera = camera;
 function update() {
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(
     buffer,
-    rect1x * tileW,
+    camera.offsetX * tileW + rect1x * tileW,
     rect1y * tileH,
     canvas.width,
     canvas.height,
@@ -244,6 +254,7 @@ function update() {
   window.requestAnimationFrame(update);
 }
 update();
+
 window.rect1x = rect1x;
 
 canvas.addEventListener("mousemove", (e) => {
@@ -253,8 +264,8 @@ canvas.addEventListener("mousemove", (e) => {
   mouseY = mousePosition.y;
   //console.log(mouseX, mouseY);
   if (MOUSE_DOWN) {
-    rect1x = rect1x - e.movementX;
-    rect1y = rect1y - e.movementY;
+    rect1x = rect1x - e.movementX - camera.offsetX;
+    rect1y = rect1y - e.movementY - camera.offsetY;
     rect2x = mousePosition.x;
     rect2y = mousePosition.y;
     if (rect1x < 0) rect1x = 0;
@@ -345,6 +356,8 @@ function highlightCell(pos) {
     tileW,
     tileH
   );
+  console.log(rect1x, rect1y);
+  //console.log(pos);
 }
 
 window.addEventListener("resize", (e) => {
@@ -355,7 +368,7 @@ window.addEventListener("resize", (e) => {
   canvas.width = width;
   canvas.height = height;
   //drawGrid();
-  console.log(width, height);
+  //console.log(width, height);
 });
 window.addEventListener("load", (e) => {
   const cs = getComputedStyle(canvas);
@@ -364,5 +377,5 @@ window.addEventListener("load", (e) => {
 
   canvas.width = width;
   canvas.height = height;
-  console.log(tileW, tileH);
+  //console.log(tileW, tileH);
 });
