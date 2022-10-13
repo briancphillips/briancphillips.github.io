@@ -9,15 +9,26 @@ const bufferCtx = buffer.getContext("2d");
 let tileW = 32;
 let tileH = 32;
 let scale = 1;
+let scaleFactor = 40 / 21;
+let scaleAmt = 1;
 let mouseX, mouseY;
+let rows = 21;
+let cols = 40;
 //canvas.width = window.innerWidth;
 canvas.width = 1280;
 //canvas.height = 400;
 canvas.height = tileH * 21;
 buffer.width = tileW * 546;
 buffer.height = tileH * 42;
-
+window.scaleAmt = scaleAmt;
 canvas.setAttribute("style", "background-color:black");
+
+class Camera {
+  constructor() {
+    this.offsetX = 0;
+    this.offsetY = 0;
+  }
+}
 // class Camera {
 //   constructor(pos, dim) {
 //     this.pos = pos;
@@ -220,7 +231,7 @@ function getMousePos(evt) {
     y: Math.floor(Math.round(evt.clientY - rect.top) / tileH),
   };
 }
-
+const camera = new Camera();
 function update() {
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(
@@ -244,6 +255,7 @@ function update() {
   window.requestAnimationFrame(update);
 }
 update();
+
 window.rect1x = rect1x;
 
 canvas.addEventListener("mousemove", (e) => {
@@ -265,7 +277,7 @@ canvas.addEventListener("mousemove", (e) => {
     if (rect1y > buffer.height / tileH - canvas.height / tileH)
       rect1y = buffer.height / tileH - canvas.height / tileH;
 
-    console.log(rect1x, rect1y);
+    //console.log(rect1x, rect1y);
   }
 });
 
@@ -304,36 +316,52 @@ window.addEventListener("keydown", (e) => {
     rect1x = buffer.width / tileW - canvas.width / tileW;
 
   if (rect1y < 0) rect1y = 0;
-  if (rect1y > buffer.height / tileH - canvas.height / scale / tileH)
-    rect1y = buffer.height / tileH - canvas.height / scale / tileH;
+  if (rect1y > buffer.height / tileH - canvas.height / scaleFactor / tileH)
+    rect1y = buffer.height / tileH - canvas.height / scaleFactor / tileH;
   //console.log(e);
-  console.log(rect1x, rect1y);
+  //console.log(rect1y, buffer.height / tileH - canvas.height / tileH);
+  //console.log(rect1x, rect1y);
 });
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
 document.getElementById("btnScaleUp").addEventListener("click", (e) => {
-  if (scale > 4) return;
+  scaleAmt += 1;
+  if (scaleAmt > 4) {
+    scaleAmt = 4;
+    return;
+  }
 
-  ctx.restore();
-  ctx.translate(canvas.width / 4, canvas.height / 4);
-  scale += 5 / 3;
-  ctx.translate(-canvas.width / 4, -canvas.height / 4);
-  scaleCanvas(scale);
+  //ctx.translate(canvas.width / 2, canvas.height / 2);
+  scaleCanvas(scaleFactor);
+  //ctx.translate(-canvas.width / 2, -canvas.height / 2);
+
   //drawGrid();
   // ctx.translate(-1, -1);
+  //console.log({ scaleFactor: scaleFactor });
+  //console.log({ rect1x: rect1x });
+  // camera.offsetX = (cols * scaleFactor) / 2 / 2 / 2;
+  // camera.offsetY = (rows * scaleFactor) / 2 / 2 / 2;
+
+  //console.log({ rect1x: rect1x });
+  //console.log(camera);
 });
 document.getElementById("btnScaleDown").addEventListener("click", (e) => {
-  ctx.restore();
-  if (scale > 5 / 3) scale -= 5 / 3;
+  scaleAmt -= 1;
+  if (scaleAmt < 1) {
+    scaleAmt = 1;
+    return;
+  }
 
-  scaleCanvas(scale);
+  //ctx.translate(canvas.width / 2, canvas.height / 2);
+  scaleCanvas(1 / scaleFactor);
+  //ctx.translate(-canvas.width / 2, -canvas.height / 2);
   //drawGrid();
 });
 
 function scaleCanvas(scale) {
-  ctx.scale(1, 1);
-  ctx.save();
+  //ctx.scale(1, 1);
+
   ctx.scale(scale, scale);
 }
 
@@ -345,24 +373,25 @@ function highlightCell(pos) {
     tileW,
     tileH
   );
+  //console.log(pos);
 }
 
-window.addEventListener("resize", (e) => {
-  const cs = getComputedStyle(canvas);
-  const width = parseInt(cs.getPropertyValue("width"), 10);
-  const height = parseInt(cs.getPropertyValue("height"), 10);
+// window.addEventListener("resize", (e) => {
+//   const cs = getComputedStyle(canvas);
+//   const width = parseInt(cs.getPropertyValue("width"), 10);
+//   const height = parseInt(cs.getPropertyValue("height"), 10);
 
-  canvas.width = width;
-  canvas.height = height;
-  //drawGrid();
-  console.log(width, height);
-});
-window.addEventListener("load", (e) => {
-  const cs = getComputedStyle(canvas);
-  const width = parseInt(cs.getPropertyValue("width"), 10);
-  const height = parseInt(cs.getPropertyValue("height"), 10);
+//   canvas.width = width;
+//   canvas.height = height;
+//   //drawGrid();
+//   console.log(width, height);
+// });
+// window.addEventListener("load", (e) => {
+//   const cs = getComputedStyle(canvas);
+//   const width = parseInt(cs.getPropertyValue("width"), 10);
+//   const height = parseInt(cs.getPropertyValue("height"), 10);
 
-  canvas.width = width;
-  canvas.height = height;
-  console.log(tileW, tileH);
-});
+//   canvas.width = width;
+//   canvas.height = height;
+//   console.log(tileW, tileH);
+// });
