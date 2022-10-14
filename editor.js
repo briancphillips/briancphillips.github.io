@@ -245,7 +245,7 @@ function scaleCanvas(scale) {
       ? Math.ceil(
           rows / 2 - canvas.height / (tileH * (scaleFactor * (zoom - 1)))
         ) / 2
-      : 1;
+      : 0;
   console.log(offsetCols, offsetRows, scaleFactor);
   ctx.scale(scale, scale);
 }
