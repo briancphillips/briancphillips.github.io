@@ -4,23 +4,23 @@ const ctx = canvas.getContext("2d");
 const buffer = document.createElement("canvas");
 const bufferCtx = buffer.getContext("2d");
 
+//canvas.setAttribute("style", "transform:scale(2,2)");
+//ctx.imageSmoothingEnabled = false;
 let tileW = 32;
 let tileH = 32;
 let scale = 1;
-let zoom = 1;
-let offsetCols = 0;
-let offsetRows = 0;
-let scaleFactor = 1;
+let scaleFactor = 40 / 21;
+let scaleAmt = 0;
 let mouseX, mouseY;
-
+//canvas.width = window.innerWidth;
 canvas.width = 1280;
-
+//canvas.height = 400;
 canvas.height = tileH * 21;
 buffer.width = tileW * 546;
 buffer.height = tileH * 42;
 
-let cols = 40;
-let rows = 42;
+let cols = canvas.width / 32;
+let rows = canvas.height / 32;
 
 canvas.setAttribute("style", "background-color:black");
 class Camera {
@@ -29,6 +29,100 @@ class Camera {
     this.offsetY = 0;
   }
 }
+// class Camera {
+//   constructor(pos, dim) {
+//     this.pos = pos;
+//     this.dim = dim;
+//     this.bounds = { x1: 0, y1: 0, x2: 0, y2: 0 };
+//     this.offset = { x: 0, y: 0 };
+//   }
+
+//   draw() {
+//     ctx.drawImage(
+//       buffer,
+//       camera.bounds.x1 - camera.offset.x,
+//       camera.bounds.y1 - camera.offset.y,
+//       canvas.width,
+//       canvas.height,
+//       0,
+//       0,
+//       canvas.width,
+//       canvas.height
+//     );
+//   }
+
+//   update(px, py) {
+//     this.offset.x = Math.floor(this.dim.x / 2 - px);
+//     this.offset.y = Math.floor(this.dim.y / 2 - py);
+//     this.pos.x = this.offset.x;
+//     this.pos.y = this.offset.y;
+//     const tile = {
+//       x: px - player.pos.x,
+//       y: py - player.pos.y,
+//     };
+
+//     this.bounds.x1 = tile.x - this.dim.x / 2;
+//     this.bounds.y1 = tile.y - this.dim.y / 2;
+
+//     if (this.bounds.x1 < 0) this.bounds.x1 = 0;
+//     if (this.bounds.y1 < 0) this.bounds.y1 = 0;
+
+//     this.bounds.x2 = tile.x + this.dim.x / 2;
+//     this.bounds.y2 = tile.y + this.dim.y / 2;
+
+//     if (this.bounds.x2 >= buffer.width) this.bounds.x2 = buffer.width;
+//     // if (this.bounds.y2 >= buffer.height - tileH)
+//     //   this.bounds.y2 = buffer.height + tileH;
+//     //console.log(this.pos.x, this.pos.y);
+//     this.draw();
+//     //console.log(camera);
+//   }
+// }
+
+// class Player {
+//   constructor(pos, vel) {
+//     this.pos = pos;
+//     this.vel = vel;
+//     this.prev = this.vel;
+//     this.w = 96;
+//     this.h = 128;
+//   }
+//   draw() {
+//     ctx.fillStyle = "red";
+//     ctx.fillRect(
+//       this.pos.x + camera.offset.x,
+//       this.pos.y + camera.offset.y,
+//       this.w,
+//       this.h
+//     );
+//   }
+
+//   update() {
+//     this.pos.x += this.vel.x;
+//     this.pos.y += this.vel.y;
+//     if (this.pos.x < 640) {
+//       this.pos.x = 640;
+//       this.vel.x = 0;
+//     }
+//     if (this.pos.x + this.w > buffer.width) {
+//       this.pos.x = buffer.width - this.w;
+//       this.vel.x = 0;
+//     }
+//     if (this.pos.y < tileH) {
+//       this.pos.y = tileH;
+//       this.vel.y = 0;
+//     }
+//     if (this.pos.y + this.h > buffer.height - tileH) {
+//       this.pos.y = buffer.height - this.h - tileH;
+//       this.vel.y = 0;
+//     }
+//     camera.update(this.pos.x, this.pos.y);
+//     //console.log(this.pos.x, this.pos.y);
+//     this.vel.x = 0;
+//     this.vel.y = 0;
+//     this.draw();
+//   }
+// }
 
 let rect1x = 0,
   rect1y = 0,
@@ -58,7 +152,9 @@ async function parseJson(url) {
   try {
     const json_data = await loadJson(url);
     return json_data;
-  } catch (e) {}
+  } catch (e) {
+    //console.log(e);
+  }
 }
 
 const level = parseJson("./map.json").then((m) => {
@@ -99,11 +195,18 @@ function drawGrid() {
   let pX = buffer.width - nX * s;
   let pY = buffer.height - nY * s;
 
+  // Bonus code for choosing nX instead of s
+  /* let nX = 20
+    let s = Math.floor(buffer.width / (nX + 2))
+    let pX = buffer.width - nX * s
+    let nY = Math.floor((buffer.height - pX) / (buffer.width - pX) * nX)
+    let pY = buffer.height - nY * s */
+
   let pL = 0;
   let pT = 0;
   let pR = 0;
   let pB = 0;
-  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   ctx.strokeStyle = "rgba(255,255,255,0.5)";
   ctx.beginPath();
   for (let x = pL; x <= buffer.width - pR; x += s) {
@@ -119,25 +222,22 @@ function drawGrid() {
 
 function getMousePos(evt) {
   let rect = canvas.getBoundingClientRect();
+  //   return {
+  //     x: Math.ceil((evt.clientX - rect.left) / tileW),
+  //     y: Math.ceil((evt.clientY - rect.top) / tileH),
+  //   };
   return {
-    x: Math.floor(
-      Math.round(evt.clientX - rect.left - (tileW * zoom) / scaleFactor) /
-        (tileW * scaleFactor) +
-        1
-    ),
-    y: Math.floor(
-      Math.round(evt.clientY - rect.top - (tileW * zoom) / scaleFactor) /
-        (tileW * scaleFactor) +
-        1
-    ),
+    x: Math.floor(Math.round(evt.clientX - rect.left) / tileW),
+    y: Math.floor(Math.round(evt.clientY - rect.top) / tileH),
   };
 }
 const camera = new Camera();
 window.camera = camera;
 function update() {
+  //ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(
     buffer,
-    camera.offsetX * tileW + rect1x * tileW,
+    rect1x * tileW,
     rect1y * tileH,
     canvas.width,
     canvas.height,
@@ -146,11 +246,11 @@ function update() {
     canvas.width,
     canvas.height
   );
-
+  //ctx.fillRect(rect1x, rect1y, rect2x - rect1x, rect2y - rect1y);
   drawGrid();
   highlightCell({
-    x: Math.ceil(mouseX * tileW),
-    y: Math.ceil(mouseY * tileH),
+    x: Math.ceil((mouseX * tileW) / scale),
+    y: Math.ceil((mouseY * tileH) / scale),
   });
 
   window.requestAnimationFrame(update);
@@ -164,19 +264,21 @@ canvas.addEventListener("mousemove", (e) => {
 
   mouseX = mousePosition.x;
   mouseY = mousePosition.y;
-
+  //console.log(mouseX, mouseY);
   if (MOUSE_DOWN) {
-    rect1x = rect1x - e.movementX - camera.offsetX;
-    rect1y = rect1y - e.movementY - camera.offsetY;
+    rect1x = rect1x - e.movementX;
+    rect1y = rect1y - e.movementY;
     rect2x = mousePosition.x;
     rect2y = mousePosition.y;
     if (rect1x < 0) rect1x = 0;
     if (rect1x > buffer.width / tileW - canvas.width / tileW)
       rect1x = buffer.width / tileW - canvas.width / tileW;
 
-    if (rect1y < 0 - offsetRows) rect1y = 0 - offsetRows;
-    if (rect1y > buffer.height / tileH - canvas.height / tileH + offsetRows)
-      rect1y = buffer.height / tileH - canvas.height / tileH + offsetRows;
+    if (rect1y < 0) rect1y = 0;
+    if (rect1y > buffer.height / tileH - canvas.height / tileH)
+      rect1y = buffer.height / tileH - canvas.height / tileH;
+
+    console.log(rect1x, rect1y);
   }
 });
 
@@ -189,10 +291,11 @@ canvas.addEventListener("mouseleave", (e) => {
 });
 
 canvas.addEventListener("mousedown", (e) => {
+  //console.log("button " + e.button);
   if (MOUSE_DOWN) {
     MOUSE_DOWN = false;
   } else {
-    if (e.button === 0) MOUSE_DOWN = true;
+    if (e.button === 1) MOUSE_DOWN = true;
   }
 });
 
@@ -213,68 +316,63 @@ window.addEventListener("keydown", (e) => {
   if (rect1x > buffer.width / tileW - canvas.width / tileW)
     rect1x = buffer.width / tileW - canvas.width / tileW;
 
-  if (rect1y < 0 - offsetRows) rect1y = 0 - offsetRows;
-  if (rect1y > buffer.height / tileH - canvas.height / tileH + offsetRows)
-    rect1y = buffer.height / tileH - canvas.height / tileH + offsetRows;
-
-  //console.log(rect1y);
+  if (rect1y < 0) rect1y = 0;
+  if (rect1y > buffer.height / tileH - canvas.height / tileH)
+    rect1y = buffer.height / tileH - canvas.height / tileH;
+  //console.log(e);
+  console.log(rect1x, buffer.height / tileH - canvas.height / tileH);
 });
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
 document.getElementById("btnScaleUp").addEventListener("click", (e) => {
-  if (zoom > 3) {
-    zoom = 3;
+  scaleAmt += 1;
+  if (scaleAmt > 3) {
+    scaleAmt = 3;
     return;
   }
-  scaleFactor = 40 / 21;
-  zoom++;
-  ctx.translate(canvas.width / 2, canvas.height / 2);
 
+  ctx.translate(canvas.width / 2, canvas.height / 2);
   scaleCanvas(scaleFactor);
   ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  rect1x += Math.floor(cols / 5);
+  rect1y += Math.floor(rows / 5);
+
+  //drawGrid();
+  // ctx.translate(-1, -1);
+  //console.log({ scaleFactor: scaleFactor });
 });
 document.getElementById("btnScaleDown").addEventListener("click", (e) => {
-  if (zoom <= 1) {
-    zoom = 1;
-    scaleFactor = 1;
+  scaleAmt -= 1;
+  if (scaleAmt < 0) {
+    scaleAmt = 0;
     return;
   }
-  scaleFactor = 40 / 21;
-  zoom--;
-  ctx.translate(canvas.width / 2, canvas.height / 2);
 
+  ctx.translate(canvas.width / 2, canvas.height / 2);
   scaleCanvas(1 / scaleFactor);
   ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  rect1x += Math.floor(cols / 5);
+  rect1y -= Math.floor(rows / 5);
+  //drawGrid();
 });
 
 function scaleCanvas(scale) {
-  offsetCols = (cols * scaleFactor) / 2 / 2;
+  //ctx.scale(1, 1);
 
-  offsetRows =
-    zoom > 1
-      ? Math.ceil(
-          rows / 2 - canvas.height / (tileH * (scaleFactor * (zoom - 1)))
-        ) / 2
-      : 0;
-  //console.log(offsetCols, offsetRows, scaleFactor);
   ctx.scale(scale, scale);
 }
 
 function highlightCell(pos) {
   ctx.fillStyle = "rgba(255,0,0,.2)";
   ctx.fillRect(
-    Math.floor((mouseX + offsetCols / 2) * 32 - (zoom - 1) * 16),
-    Math.floor((mouseY + offsetRows) * 32),
+    Math.floor(pos.x / 32) * 32,
+    Math.floor(pos.y / 32) * 32,
     tileW,
     tileH
   );
-  //console.log(Math.floor((mouseX + offsetCols / 2) * 32 - 16));
-  console.log({
-    x: Math.floor((mouseX + offsetCols / 2) * 32 - (zoom - 1) * 16),
-    y: Math.floor((mouseY + offsetRows) * 32),
-  });
-  //console.log(offsetRows);
+  console.log(rect1x, rect1y);
+  //console.log(pos);
 }
 
 window.addEventListener("resize", (e) => {
@@ -284,6 +382,8 @@ window.addEventListener("resize", (e) => {
 
   canvas.width = width;
   canvas.height = height;
+  //drawGrid();
+  //console.log(width, height);
 });
 window.addEventListener("load", (e) => {
   const cs = getComputedStyle(canvas);
@@ -292,4 +392,5 @@ window.addEventListener("load", (e) => {
 
   canvas.width = width;
   canvas.height = height;
+  //console.log(tileW, tileH);
 });
