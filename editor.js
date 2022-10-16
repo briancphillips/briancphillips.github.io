@@ -265,7 +265,7 @@ function highlightCell(pos) {
   ctx.fillStyle = "rgba(255,0,0,.2)";
   ctx.fillRect(
     Math.floor((mouseX + offsetCols / 2) * 32 - (zoom - 1) * 16),
-    Math.floor((mouseY + offsetRows) * 32),
+    Math.floor(mouseY + offsetRows) * (32 / (scaleFactor * 32)),
     tileW,
     tileH
   );
@@ -273,6 +273,7 @@ function highlightCell(pos) {
   console.log({
     x: Math.floor((mouseX + offsetCols / 2) * 32 - (zoom - 1) * 16),
     y: Math.floor((mouseY + offsetRows) * 32),
+    row: Math.floor(mouseY + offsetRows - (zoom - 1) / 32),
   });
   //console.log(offsetRows);
 }
