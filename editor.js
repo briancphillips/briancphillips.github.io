@@ -119,16 +119,34 @@ function drawGrid() {
 
 function getMousePos(evt) {
   let rect = canvas.getBoundingClientRect();
+  // console.log({
+  //   xx: Math.floor(
+  //     Math.floor(evt.clientX - rect.left) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  //   yy: Math.floor(
+  //     Math.round(evt.clientY - rect.top) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  // });
+  // console.log({
+  //   x: Math.floor(
+  //     Math.floor(evt.clientX - rect.left) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  //   y: Math.floor(
+  //     Math.round(evt.clientY - rect.top) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  // });
   return {
     x: Math.floor(
-      Math.round(evt.clientX - rect.left - (tileW * zoom) / scaleFactor) /
-        (tileW * scaleFactor) +
-        1
+      Math.floor(evt.clientX - rect.left) /
+        Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
     ),
     y: Math.floor(
-      Math.round(evt.clientY - rect.top - (tileW * zoom) / scaleFactor) /
-        (tileW * scaleFactor) +
-        1
+      Math.round(evt.clientY - rect.top) /
+        Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
     ),
   };
 }
@@ -249,7 +267,11 @@ document.getElementById("btnScaleDown").addEventListener("click", (e) => {
 });
 
 function scaleCanvas(scale) {
-  offsetCols = (cols * scaleFactor) / 2 / 2;
+  offsetCols =
+    zoom > 1
+      ? Math.ceil(cols - canvas.width / (tileH * (scaleFactor * (zoom - 1)))) /
+        2
+      : 0;
 
   offsetRows =
     zoom > 1
@@ -264,18 +286,20 @@ function scaleCanvas(scale) {
 function highlightCell(pos) {
   ctx.fillStyle = "rgba(255,0,0,.2)";
   ctx.fillRect(
-    Math.floor((mouseX + offsetCols / 2) * 32 - (zoom - 1) * 16),
-    Math.floor(mouseY + offsetRows) * (32 / (scaleFactor * 32)),
+    Math.floor(
+      (mouseX + offsetCols) * 32 -
+        32 / (zoom > 1 ? scaleFactor * (zoom - 1) : (32 * scaleFactor) / 32)
+    ),
+    Math.floor((mouseY + offsetRows) * 32),
     tileW,
     tileH
   );
-  //console.log(Math.floor((mouseX + offsetCols / 2) * 32 - 16));
-  console.log({
-    x: Math.floor((mouseX + offsetCols / 2) * 32 - (zoom - 1) * 16),
-    y: Math.floor((mouseY + offsetRows) * 32),
-    row: Math.floor(mouseY + offsetRows - (zoom - 1) / 32),
-  });
-  //console.log(offsetRows);
+  // console.log(Math.floor((mouseX + offsetCols / 2) * 32 - 16));
+  // console.log({
+  //   x: Math.floor(mouseX + offsetCols / 2),
+  //   y: Math.floor(mouseY + offsetRows),
+  // });
+  console.log(offsetCols);
 }
 
 window.addEventListener("resize", (e) => {
