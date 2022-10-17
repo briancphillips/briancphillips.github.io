@@ -10,17 +10,8 @@ let scale = 1;
 let zoom = 1;
 let offsetCols = 0;
 let offsetRows = 0;
-let scaleFactor = 3;
+let scaleFactor = 1;
 let mouseX, mouseY;
-
-let rect1x = 0,
-  rect1y = 0,
-  rect2x = 0,
-  rect2y = 0;
-
-let cols = 40;
-let rows = 42;
-let MOUSE_DOWN = false;
 
 canvas.width = 1280;
 
@@ -28,25 +19,25 @@ canvas.height = tileH * 21;
 buffer.width = tileW * 546;
 buffer.height = tileH * 42;
 
-//canvas.setAttribute("style", "background-color:black");
+let cols = 40;
+let rows = 42;
 
-ctx.strokeStyle = "red";
-ctx.strokeRect(0, 0, canvas.width, canvas.height);
-
-class Cursor {
-  constructor() {
-    this.col = 0;
-    this.row = 0;
-  }
-}
+canvas.setAttribute("style", "background-color:black");
 class Camera {
   constructor() {
     this.offsetX = 0;
     this.offsetY = 0;
-    this.offsetCol = 0;
-    this.offsetRow = 0;
   }
 }
+
+let rect1x = 0,
+  rect1y = 0,
+  rect2x = 0,
+  rect2y = 0;
+
+let MOUSE_DOWN = false;
+ctx.strokeStyle = "red";
+ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
 function loadImage(url) {
   return new Promise((resolve) => {
@@ -126,13 +117,45 @@ function drawGrid() {
   ctx.stroke();
 }
 
+function getMousePos(evt) {
+  let rect = canvas.getBoundingClientRect();
+  // console.log({
+  //   xx: Math.floor(
+  //     Math.floor(evt.clientX - rect.left) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  //   yy: Math.floor(
+  //     Math.round(evt.clientY - rect.top) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  // });
+  // console.log({
+  //   x: Math.floor(
+  //     Math.floor(evt.clientX - rect.left) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  //   y: Math.floor(
+  //     Math.round(evt.clientY - rect.top) /
+  //       Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+  //   ),
+  // });
+  return {
+    x: Math.floor(
+      Math.floor(evt.clientX - rect.left) /
+        Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+    ),
+    y: Math.floor(
+      Math.round(evt.clientY - rect.top) /
+        Math.floor(32 * (scaleFactor * (zoom > 1 ? zoom - 1 : 1)))
+    ),
+  };
+}
 const camera = new Camera();
-const cursor = new Cursor();
 window.camera = camera;
 function update() {
   ctx.drawImage(
     buffer,
-    rect1x * tileW,
+    camera.offsetX * tileW + rect1x * tileW,
     rect1y * tileH,
     canvas.width,
     canvas.height,
@@ -142,44 +165,18 @@ function update() {
     canvas.height
   );
 
-  highlightCell({
-    x: Math.floor(mouseX / tileW) * tileW,
-    y: Math.floor(mouseY / tileH) * tileH,
-  });
   drawGrid();
-  //console.log(camera);
+  highlightCell({
+    x: Math.ceil(mouseX * tileW),
+    y: Math.ceil(mouseY * tileH),
+  });
+
   window.requestAnimationFrame(update);
 }
 update();
 
-function scaleCanvas(scale) {}
-
-function highlightCell(pos) {
-  ctx.fillStyle = "rgba(255,0,0,.2)";
-  ctx.fillRect(
-    Math.floor(pos.x / (tileW * scaleFactor)) * tileW,
-    Math.floor(pos.y / (tileH * scaleFactor)) * tileH,
-    tileW,
-    tileH
-  );
-  cursor.col = Math.floor(pos.x / (tileW * scaleFactor) + camera.offsetCol);
-  cursor.row = Math.floor(pos.y / (tileH * scaleFactor) + camera.offsetRow);
-  console.log(cursor.col, cursor.row);
-}
-
-function getMousePos(evt) {
-  let rect = canvas.getBoundingClientRect();
-
-  return {
-    x: evt.clientX - rect.left,
-    y: evt.clientY - rect.top,
-  };
-}
-
 window.rect1x = rect1x;
 
-document.getElementById("btnScaleUp").addEventListener("click", (e) => {});
-document.getElementById("btnScaleDown").addEventListener("click", (e) => {});
 canvas.addEventListener("mousemove", (e) => {
   let mousePosition = getMousePos(e);
 
@@ -187,9 +184,8 @@ canvas.addEventListener("mousemove", (e) => {
   mouseY = mousePosition.y;
 
   if (MOUSE_DOWN) {
-    rect1x = rect1x - e.movementX;
-    rect1y = rect1y - e.movementY;
-
+    rect1x = rect1x - e.movementX - camera.offsetX;
+    rect1y = rect1y - e.movementY - camera.offsetY;
     rect2x = mousePosition.x;
     rect2y = mousePosition.y;
     if (rect1x < 0) rect1x = 0;
@@ -199,17 +195,9 @@ canvas.addEventListener("mousemove", (e) => {
     if (rect1y < 0 - offsetRows) rect1y = 0 - offsetRows;
     if (rect1y > buffer.height / tileH - canvas.height / tileH + offsetRows)
       rect1y = buffer.height / tileH - canvas.height / tileH + offsetRows;
-
-    camera.offsetCol = rect1x;
-    camera.offsetRow = rect1y;
-
-    camera.offsetX = rect1x * tileW;
-    camera.offsetY = rect1y * tileH;
   }
 });
-canvas.addEventListener("click", (e) => {
-  console.log(cursor);
-});
+
 canvas.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
 });
@@ -247,16 +235,72 @@ window.addEventListener("keydown", (e) => {
   if (rect1y > buffer.height / tileH - canvas.height / tileH + offsetRows)
     rect1y = buffer.height / tileH - canvas.height / tileH + offsetRows;
 
-  camera.offsetCol = rect1x;
-  camera.offsetRow = rect1y;
-
-  camera.offsetX = rect1x * tileW;
-  camera.offsetY = rect1y * tileH;
-
   //console.log(rect1y);
 });
 
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+document.getElementById("btnScaleUp").addEventListener("click", (e) => {
+  if (zoom > 3) {
+    zoom = 3;
+    return;
+  }
+  scaleFactor = 40 / 21;
+  zoom++;
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+
+  scaleCanvas(scaleFactor);
+  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+});
+document.getElementById("btnScaleDown").addEventListener("click", (e) => {
+  if (zoom <= 1) {
+    zoom = 1;
+    scaleFactor = 1;
+    return;
+  }
+  scaleFactor = 40 / 21;
+  zoom--;
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+
+  scaleCanvas(1 / scaleFactor);
+  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+});
+
+function scaleCanvas(scale) {
+  offsetCols =
+    zoom > 1
+      ? Math.ceil(cols - canvas.width / (tileH * (scaleFactor * (zoom - 1)))) /
+        2
+      : 0;
+
+  offsetRows =
+    zoom > 1
+      ? Math.ceil(
+          rows / 2 - canvas.height / (tileH * (scaleFactor * (zoom - 1)))
+        ) / 2
+      : 0;
+  //console.log(offsetCols, offsetRows, scaleFactor);
+  ctx.scale(scale, scale);
+}
+
+function highlightCell(pos) {
+  ctx.fillStyle = "rgba(255,0,0,.2)";
+  ctx.fillRect(
+    Math.floor(
+      (mouseX + offsetCols) * 32 -
+        32 / (zoom > 1 ? scaleFactor * (zoom - 1) : (32 * scaleFactor) / 32)
+    ),
+    Math.floor((mouseY + offsetRows) * 32),
+    tileW,
+    tileH
+  );
+  // console.log(Math.floor((mouseX + offsetCols / 2) * 32 - 16));
+  // console.log({
+  //   x: Math.floor(mouseX + offsetCols / 2),
+  //   y: Math.floor(mouseY + offsetRows),
+  // });
+  console.log(offsetCols);
+}
 
 window.addEventListener("resize", (e) => {
   const cs = getComputedStyle(canvas);
