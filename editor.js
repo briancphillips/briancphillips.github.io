@@ -1,4 +1,7 @@
-const canvas = document.querySelector("canvas");
+const grid = document.querySelector("canvas");
+const gridCtx = grid.getContext("2d");
+
+const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
 
 const buffer = document.createElement("canvas");
@@ -23,8 +26,10 @@ let rows = 42;
 let MOUSE_DOWN = false;
 
 canvas.width = 1280;
+grid.width = 1280;
 
 canvas.height = tileH * 21;
+grid.height = tileH * 21;
 buffer.width = tileW * 546;
 buffer.height = tileH * 42;
 
@@ -46,6 +51,13 @@ class Camera {
     this.offsetY = 0;
     this.offsetCol = 0;
     this.offsetRow = 0;
+    this.visibleCols = cols;
+    this.visibleRows = rows;
+  }
+
+  update() {
+    this.visibleCols = canvas.width / (tileW * scaleFactor);
+    this.visibleRows = canvas.height / (tileH * scaleFactor);
   }
 }
 
@@ -103,9 +115,9 @@ const level = parseJson("./map.json").then((m) => {
 });
 
 function drawGrid() {
-  let s = 32;
-  let nX = Math.floor(buffer.width / s) - 2;
-  let nY = Math.floor(buffer.height / s) - 2;
+  let s = 32 * scaleFactor;
+  let nX = Math.floor(canvas.width / s) - 0;
+  let nY = Math.floor(canvas.height / s) - 0;
   let pX = buffer.width - nX * s;
   let pY = buffer.height - nY * s;
 
@@ -114,17 +126,21 @@ function drawGrid() {
   let pR = 0;
   let pB = 0;
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = "rgba(255,255,255,0.5)";
-  ctx.beginPath();
-  for (let x = pL; x <= buffer.width - pR; x += s) {
-    ctx.moveTo(x, pT);
-    ctx.lineTo(x, buffer.height - pB);
+  gridCtx.strokeStyle = "rgba(255,255,255,0.5)";
+  gridCtx.beginPath();
+  for (let x = pL; x <= grid.width - pR; x += s) {
+    gridCtx.moveTo(x, pT);
+    gridCtx.lineTo(x, grid.height - pB);
   }
-  for (let y = pT; y <= buffer.height - pB; y += s) {
-    ctx.moveTo(pL, y);
-    ctx.lineTo(buffer.width - pR, y);
+  for (let y = pT; y <= grid.height - pB; y += s) {
+    gridCtx.moveTo(pL, y);
+    gridCtx.lineTo(grid.width - pR, y);
   }
-  ctx.stroke();
+  gridCtx.stroke();
+  highlightCell({
+    x: Math.floor(mouseX / tileW) * tileW,
+    y: Math.floor(mouseY / tileH) * tileH,
+  });
 }
 
 const camera = new Camera();
@@ -145,10 +161,7 @@ function update() {
     canvas.height
   );
 
-  highlightCell({
-    x: Math.floor(mouseX / tileW) * tileW,
-    y: Math.floor(mouseY / tileH) * tileH,
-  });
+  gridCtx.drawImage(canvas, 0, 0);
   drawGrid();
 
   //console.log(camera);
@@ -157,19 +170,12 @@ function update() {
 update();
 
 function scaleCanvas(scale) {
-  offsetCols =
-    scale > 1
-      ? Math.floor(Math.ceil(cols - canvas.width / (tileH * scale)) / 2)
-      : 0;
+  offsetCols = scale > 1 ? (cols - canvas.width / (tileH * scale)) / 2 : 0;
 
-  offsetRows =
-    scale > 1
-      ? Math.floor(Math.ceil(rows / 2 - canvas.height / (tileH * scale)) / 2)
-      : 0;
+  offsetRows = scale > 1 ? (rows / 2 - canvas.height / (tileH * scale)) / 2 : 0;
 
   if (scaleFactor < 1) {
     scaleFactor = 1;
-
     return;
   }
 
@@ -178,43 +184,51 @@ function scaleCanvas(scale) {
     if (cursor.row < rows / 2) rect1y = 0;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
+
+  drawGrid();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.translate(canvas.width / 2, canvas.height / 2);
 
   ctx.scale(scale, scale);
   ctx.translate(-canvas.width / 2, -canvas.height / 2);
-  ctx.drawImage(
-    buffer,
-    rect1x * tileW,
-    rect1y * tileH,
-    canvas.width,
-    canvas.height,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
+  // gridCtx.fillStyle = "black";
+  // gridCtx.fillRect(0, 0, canvas.width, canvas.height);
+  // ctx.drawImage(
+  //   buffer,
+  //   rect1x * tileW,
+  //   rect1y * tileH,
+  //   canvas.width,
+  //   canvas.height,
+  //   0,
+  //   0,
+  //   canvas.width,
+  //   canvas.height
+  // );
+  // gridCtx.drawImage(canvas, 0, 0);
+  //drawGrid();
   console.log(offsetCols, offsetRows);
   //update rectx1 and recty1
 }
 
 function highlightCell(pos) {
-  ctx.fillStyle = cursor.color;
-  ctx.fillRect(
-    Math.floor(pos.x / (tileW * scaleFactor)) * tileW + offsetCols * tileW,
-    Math.floor(pos.y / (tileH * scaleFactor)) * tileH + offsetRows * tileH,
-    tileW,
-    tileH
+  gridCtx.fillStyle = cursor.color;
+  gridCtx.fillRect(
+    Math.floor(pos.x / (tileW * scaleFactor)) * tileW * scaleFactor,
+    Math.floor(pos.y / (tileH * scaleFactor)) * tileH * scaleFactor,
+    tileW * scaleFactor,
+    tileH * scaleFactor
   );
-  cursor.col =
-    Math.floor(pos.x / (tileW * scaleFactor) + camera.offsetCol) + offsetCols;
-  cursor.row =
-    Math.floor(pos.y / (tileH * scaleFactor) + camera.offsetRow) + offsetRows;
+  cursor.col = Math.floor(
+    pos.x / (tileW * scaleFactor) + camera.offsetCol + offsetCols
+  );
+  cursor.row = Math.floor(
+    pos.y / (tileH * scaleFactor) + camera.offsetRow + offsetRows
+  );
   //console.log(cursor.col, cursor.row);
 }
 
 function getMousePos(evt) {
-  let rect = canvas.getBoundingClientRect();
+  let rect = grid.getBoundingClientRect();
 
   return {
     x: evt.clientX - rect.left,
@@ -232,7 +246,7 @@ document.getElementById("btnScaleDown").addEventListener("click", (e) => {
   scaleFactor -= 1;
   scaleCanvas(scaleFactor);
 });
-canvas.addEventListener("mousemove", (e) => {
+grid.addEventListener("mousemove", (e) => {
   let mousePosition = getMousePos(e);
 
   mouseX = mousePosition.x;
@@ -244,9 +258,9 @@ canvas.addEventListener("mousemove", (e) => {
 
     rect2x = mousePosition.x;
     rect2y = mousePosition.y;
-    if (rect1x < 0) rect1x = 0;
-    if (rect1x > buffer.width / tileW - canvas.width / tileW)
-      rect1x = buffer.width / tileW - canvas.width / tileW;
+    if (rect1x < 0 - offsetCols) rect1x = 0 - offsetCols;
+    if (rect1x > buffer.width / tileW - canvas.width / tileW + offsetCols)
+      rect1x = buffer.width / tileW - canvas.width / tileW + offsetCols;
 
     if (rect1y < 0 - offsetRows) rect1y = 0 - offsetRows;
     if (rect1y > buffer.height / tileH - canvas.height / tileH + offsetRows)
@@ -259,18 +273,18 @@ canvas.addEventListener("mousemove", (e) => {
     camera.offsetY = rect1y * tileH;
   }
 });
-canvas.addEventListener("click", (e) => {
+grid.addEventListener("click", (e) => {
   console.log(cursor);
 });
-canvas.addEventListener("mouseup", (e) => {
+grid.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
 });
 
-canvas.addEventListener("mouseleave", (e) => {
+grid.addEventListener("mouseleave", (e) => {
   MOUSE_DOWN = false;
 });
 
-canvas.addEventListener("mousedown", (e) => {
+grid.addEventListener("mousedown", (e) => {
   if (MOUSE_DOWN) {
     MOUSE_DOWN = false;
   } else {
@@ -308,7 +322,7 @@ window.addEventListener("keydown", (e) => {
   //console.log(rect1y);
 });
 
-canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+grid.addEventListener("contextmenu", (e) => e.preventDefault());
 
 window.addEventListener("resize", (e) => {
   // const cs = getComputedStyle(canvas);
