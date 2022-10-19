@@ -26,8 +26,8 @@ canvas {
   cursor: pointer;
 }
 canvas#editor {
-  width: 1280px;
-  height: 672px;
+  /* width: 1280px;
+  height: 672px; */
 }
 pre {
   color: white;

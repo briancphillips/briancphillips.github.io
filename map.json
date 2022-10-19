@@ -1,7 +1,4 @@
 {
-  "compressionlevel": -1,
-  "height": 43,
-  "infinite": false,
   "layers": [
     {
       "data": [
@@ -1054,41 +1051,7 @@
         23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
         23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
         23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23
-      ],
-      "height": 43,
-      "id": 1,
-      "name": "Tile Layer 1",
-      "opacity": 1,
-      "type": "tilelayer",
-      "visible": true,
-      "width": 546,
-      "x": 0,
-      "y": 0
+      ]
     }
-  ],
-  "nextlayerid": 2,
-  "nextobjectid": 1,
-  "orientation": "orthogonal",
-  "renderorder": "right-down",
-  "tiledversion": "1.9.2",
-  "tileheight": 8,
-  "tilesets": [
-    {
-      "columns": 8,
-      "firstgid": 1,
-      "image": "images/tiles.png",
-      "imageheight": 96,
-      "imagewidth": 64,
-      "margin": 0,
-      "name": "Tiles",
-      "spacing": 0,
-      "tilecount": 96,
-      "tileheight": 8,
-      "tilewidth": 8
-    }
-  ],
-  "tilewidth": 8,
-  "type": "map",
-  "version": "1.9",
-  "width": 546
+  ]
 }

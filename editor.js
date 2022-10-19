@@ -12,12 +12,14 @@ let tileH = 32;
 
 let zoom = 1;
 let mouseX, mouseY;
-let prevRect1x, prevRect1y;
+let prevRect1x = 0;
+let prevRect1y = 0;
 
-let cols = 40;
+let cols = 546;
 let rows = 42;
 let MOUSE_DOWN = false;
 
+const matrix = new Array(rows).fill(0).map(() => new Array(cols).fill(0));
 canvas.width = 1280;
 grid.width = 1280;
 
@@ -51,8 +53,8 @@ class Camera {
   }
 
   update() {
-    this.visibleCols = zoom > 1 ? canvas.width / (tileW * zoom) : 40;
-    this.visibleRows = zoom > 1 ? canvas.height / (tileH * zoom) : 21;
+    this.visibleCols = canvas.width / (tileW * zoom);
+    this.visibleRows = canvas.height / (tileH * zoom);
   }
 }
 
@@ -80,8 +82,11 @@ async function parseJson(url) {
 
 const level = parseJson("./map.json").then((m) => {
   const layers = m.layers;
-  const cols = m.width;
-  const tileMapCols = m.tilewidth;
+
+  const tileMapCols = 8;
+
+  //console.log(matrix); // 0
+
   bufferCtx.fillStyle = "black";
   bufferCtx.fillRect(0, 0, buffer.width, buffer.height);
 
@@ -92,7 +97,7 @@ const level = parseJson("./map.json").then((m) => {
         const row = parseInt(i / cols, 10);
         const tilemapX = (element - 1) % tileMapCols;
         const tileMapY = Math.floor((element - 1) / tileMapCols);
-
+        matrix[row][col] = element - 1;
         bufferCtx.drawImage(
           img,
           tilemapX * tileW,
@@ -123,11 +128,11 @@ function drawGrid() {
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
   gridCtx.strokeStyle = "rgba(255,255,255,0.5)";
   gridCtx.beginPath();
-  for (let x = pL; x <= grid.width - pR; x += s) {
+  for (let x = pL; x < grid.width - pR; x += s) {
     gridCtx.moveTo(x, pT);
     gridCtx.lineTo(x, grid.height - pB);
   }
-  for (let y = pT; y <= grid.height - pB; y += s) {
+  for (let y = pT; y < grid.height - pB; y += s) {
     gridCtx.moveTo(pL, y);
     gridCtx.lineTo(grid.width - pR, y);
   }
@@ -213,7 +218,9 @@ function highlightCell(pos) {
   );
   cursor.col = Math.floor(pos.x / (tileW * zoom) + camera.offsetCol);
   cursor.row = Math.floor(pos.y / (tileH * zoom) + camera.offsetRow);
-  //console.log(cursor.col, cursor.row);
+
+  // if (!isNan(cursor.col) && !isNan(cursor.row))
+  //   console.log(matrix[cursor.row][cursor.col]);
 }
 
 function getMousePos(evt) {
@@ -243,12 +250,13 @@ grid.addEventListener("mousemove", (e) => {
   mouseY = mousePosition.y;
 
   if (MOUSE_DOWN) {
+    grid.setAttribute("style", "cursor: all-scroll");
     camera.pos.x = camera.pos.x - e.movementX;
     camera.pos.y = camera.pos.y - e.movementY;
 
     if (camera.pos.x < 0) camera.pos.x = 0;
-    if (camera.pos.x > buffer.width / tileW - canvas.width / tileW)
-      camera.pos.x = buffer.width / tileW - canvas.width / tileW;
+    if (camera.pos.x >= Math.ceil(cols - camera.visibleCols))
+      camera.pos.x = Math.ceil(cols - camera.visibleCols);
 
     if (camera.pos.y < 0) camera.pos.y = 0;
     if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
@@ -263,9 +271,13 @@ grid.addEventListener("mousemove", (e) => {
 });
 grid.addEventListener("click", (e) => {
   console.log(cursor);
+  console.log(matrix[cursor.row][cursor.col]);
+  // bufferCtx.fillStyle = "blue";
+  // bufferCtx.fillRect(cursor.col * tileW, cursor.row * tileH, 32, 32);
 });
 grid.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
+  grid.removeAttribute("style", "cursor: all-scroll");
   prevRect1x = camera.pos.x;
   prevRect1y = camera.pos.y;
 });
@@ -283,6 +295,10 @@ grid.addEventListener("mousedown", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
+  if (e.code === "Digit0") {
+    zoom = 1;
+    scaleCanvas(zoom);
+  }
   if (e.code === "Minus") {
     zoom -= 1;
     scaleCanvas(zoom);
@@ -324,16 +340,20 @@ window.addEventListener("keydown", (e) => {
 grid.addEventListener("contextmenu", (e) => e.preventDefault());
 
 window.addEventListener("resize", (e) => {
-  // const cs = getComputedStyle(canvas);
-  // const width = parseInt(cs.getPropertyValue("width"), 10);
-  // const height = parseInt(cs.getPropertyValue("height"), 10);
-  // canvas.width = width;
-  // canvas.height = height;
+  const cs = getComputedStyle(grid);
+  const width = parseInt(cs.getPropertyValue("width"), 10);
+  const height = parseInt(cs.getPropertyValue("height"), 10);
+  canvas.width = width;
+  canvas.height = height;
+  grid.width = width;
+  grid.height = height;
 });
 window.addEventListener("load", (e) => {
-  // const cs = getComputedStyle(canvas);
-  // const width = parseInt(cs.getPropertyValue("width"), 10);
-  // const height = parseInt(cs.getPropertyValue("height"), 10);
-  // canvas.width = width;
-  // canvas.height = height;
+  const cs = getComputedStyle(grid);
+  const width = parseInt(cs.getPropertyValue("width"), 10);
+  const height = parseInt(cs.getPropertyValue("height"), 10);
+  canvas.width = width;
+  canvas.height = height;
+  grid.width = width;
+  grid.height = height;
 });
