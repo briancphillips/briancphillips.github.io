@@ -9,17 +9,10 @@ const bufferCtx = buffer.getContext("2d");
 
 let tileW = 32;
 let tileH = 32;
-let scale = 1;
-let zoom = 1;
-let offsetCols = 0;
-let offsetRows = 0;
-let scaleFactor = 1;
-let mouseX, mouseY;
 
-let rect1x = 0,
-  rect1y = 0,
-  rect2x = 0,
-  rect2y = 0;
+let zoom = 1;
+let mouseX, mouseY;
+let prevRect1x, prevRect1y;
 
 let cols = 40;
 let rows = 42;
@@ -47,17 +40,19 @@ class Cursor {
 }
 class Camera {
   constructor() {
+    this.pos = { x: 0, y: 0 };
+
     this.offsetX = 0;
     this.offsetY = 0;
     this.offsetCol = 0;
     this.offsetRow = 0;
-    this.visibleCols = cols;
-    this.visibleRows = rows;
+    this.visibleCols = 40;
+    this.visibleRows = 21;
   }
 
   update() {
-    this.visibleCols = canvas.width / (tileW * scaleFactor);
-    this.visibleRows = canvas.height / (tileH * scaleFactor);
+    this.visibleCols = zoom > 1 ? canvas.width / (tileW * zoom) : 40;
+    this.visibleRows = zoom > 1 ? canvas.height / (tileH * zoom) : 21;
   }
 }
 
@@ -115,7 +110,7 @@ const level = parseJson("./map.json").then((m) => {
 });
 
 function drawGrid() {
-  let s = 32 * scaleFactor;
+  let s = 32 * zoom;
   let nX = Math.floor(canvas.width / s) - 0;
   let nY = Math.floor(canvas.height / s) - 0;
   let pX = buffer.width - nX * s;
@@ -151,8 +146,8 @@ function update() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(
     buffer,
-    rect1x * tileW,
-    rect1y * tileH,
+    camera.pos.x * tileW,
+    camera.pos.y * tileH,
     canvas.width,
     canvas.height,
     0,
@@ -163,40 +158,39 @@ function update() {
 
   gridCtx.drawImage(canvas, 0, 0);
   drawGrid();
-
+  camera.update();
   //console.log(camera);
   window.requestAnimationFrame(update);
 }
 update();
 
 function scaleCanvas(scale) {
-  offsetCols = scale > 1 ? (cols - canvas.width / (tileH * scale)) / 2 : 0;
+  // prevRect1x = camera.pos.x;
+  // prevRect1y = camera.pos.y;
 
-  offsetRows = scale > 1 ? (rows / 2 - canvas.height / (tileH * scale)) / 2 : 0;
-
-  if (scaleFactor < 1) {
-    scaleFactor = 1;
+  if (zoom < 1) {
+    zoom = 1;
     return;
   }
 
-  if (scaleFactor == 1) {
-    if (cursor.row > rows / 2) rect1y = rows / 2;
-    if (cursor.row < rows / 2) rect1y = 0;
+  if (zoom == 1) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+    camera.pos.x = prevRect1x;
+    camera.pos.y = prevRect1y;
   }
 
   drawGrid();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.translate(canvas.width / 2, canvas.height / 2);
+  //ctx.translate(canvas.width / 2, canvas.height / 2);
 
   ctx.scale(scale, scale);
-  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  //ctx.translate(-canvas.width / 2, -canvas.height / 2);
   // gridCtx.fillStyle = "black";
   // gridCtx.fillRect(0, 0, canvas.width, canvas.height);
   // ctx.drawImage(
   //   buffer,
-  //   rect1x * tileW,
-  //   rect1y * tileH,
+  //   camera.pos.x * tileW,
+  //   camera.pos.y * tileH,
   //   canvas.width,
   //   canvas.height,
   //   0,
@@ -206,24 +200,19 @@ function scaleCanvas(scale) {
   // );
   // gridCtx.drawImage(canvas, 0, 0);
   //drawGrid();
-  console.log(offsetCols, offsetRows);
   //update rectx1 and recty1
 }
 
 function highlightCell(pos) {
   gridCtx.fillStyle = cursor.color;
   gridCtx.fillRect(
-    Math.floor(pos.x / (tileW * scaleFactor)) * tileW * scaleFactor,
-    Math.floor(pos.y / (tileH * scaleFactor)) * tileH * scaleFactor,
-    tileW * scaleFactor,
-    tileH * scaleFactor
+    Math.floor(pos.x / (tileW * zoom)) * tileW * zoom,
+    Math.floor(pos.y / (tileH * zoom)) * tileH * zoom,
+    tileW * zoom,
+    tileH * zoom
   );
-  cursor.col = Math.floor(
-    pos.x / (tileW * scaleFactor) + camera.offsetCol + offsetCols
-  );
-  cursor.row = Math.floor(
-    pos.y / (tileH * scaleFactor) + camera.offsetRow + offsetRows
-  );
+  cursor.col = Math.floor(pos.x / (tileW * zoom) + camera.offsetCol);
+  cursor.row = Math.floor(pos.y / (tileH * zoom) + camera.offsetRow);
   //console.log(cursor.col, cursor.row);
 }
 
@@ -236,15 +225,16 @@ function getMousePos(evt) {
   };
 }
 
-window.rect1x = rect1x;
-window.scaleFactor = scaleFactor;
+window.camera.pos.x = camera.pos.x;
+window.zoom = zoom;
+
 document.getElementById("btnScaleUp").addEventListener("click", (e) => {
-  scaleFactor += 1;
-  scaleCanvas(scaleFactor);
+  zoom += 1;
+  scaleCanvas(zoom);
 });
 document.getElementById("btnScaleDown").addEventListener("click", (e) => {
-  scaleFactor -= 1;
-  scaleCanvas(scaleFactor);
+  zoom -= 1;
+  scaleCanvas(zoom);
 });
 grid.addEventListener("mousemove", (e) => {
   let mousePosition = getMousePos(e);
@@ -253,24 +243,22 @@ grid.addEventListener("mousemove", (e) => {
   mouseY = mousePosition.y;
 
   if (MOUSE_DOWN) {
-    rect1x = rect1x - e.movementX;
-    rect1y = rect1y - e.movementY;
+    camera.pos.x = camera.pos.x - e.movementX;
+    camera.pos.y = camera.pos.y - e.movementY;
 
-    rect2x = mousePosition.x;
-    rect2y = mousePosition.y;
-    if (rect1x < 0 - offsetCols) rect1x = 0 - offsetCols;
-    if (rect1x > buffer.width / tileW - canvas.width / tileW + offsetCols)
-      rect1x = buffer.width / tileW - canvas.width / tileW + offsetCols;
+    if (camera.pos.x < 0) camera.pos.x = 0;
+    if (camera.pos.x > buffer.width / tileW - canvas.width / tileW)
+      camera.pos.x = buffer.width / tileW - canvas.width / tileW;
 
-    if (rect1y < 0 - offsetRows) rect1y = 0 - offsetRows;
-    if (rect1y > buffer.height / tileH - canvas.height / tileH + offsetRows)
-      rect1y = buffer.height / tileH - canvas.height / tileH + offsetRows;
+    if (camera.pos.y < 0) camera.pos.y = 0;
+    if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
+      camera.pos.y = Math.ceil(rows - camera.visibleRows);
 
-    camera.offsetCol = rect1x;
-    camera.offsetRow = rect1y;
+    camera.offsetCol = camera.pos.x;
+    camera.offsetRow = camera.pos.y;
 
-    camera.offsetX = rect1x * tileW;
-    camera.offsetY = rect1y * tileH;
+    camera.offsetX = camera.pos.x * tileW;
+    camera.offsetY = camera.pos.y * tileH;
   }
 });
 grid.addEventListener("click", (e) => {
@@ -278,6 +266,8 @@ grid.addEventListener("click", (e) => {
 });
 grid.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
+  prevRect1x = camera.pos.x;
+  prevRect1y = camera.pos.y;
 });
 
 grid.addEventListener("mouseleave", (e) => {
@@ -293,33 +283,42 @@ grid.addEventListener("mousedown", (e) => {
 });
 
 window.addEventListener("keydown", (e) => {
+  if (e.code === "Minus") {
+    zoom -= 1;
+    scaleCanvas(zoom);
+  }
+  if (e.code === "Equal") {
+    zoom += 1;
+    scaleCanvas(zoom);
+  }
+
   if (e.code === "ArrowLeft") {
-    rect1x = rect1x - 1;
+    camera.pos.x = camera.pos.x - 1;
   }
   if (e.code === "ArrowRight") {
-    rect1x = rect1x + 1;
+    camera.pos.x = camera.pos.x + 1;
   }
   if (e.code === "ArrowUp") {
-    rect1y = rect1y - 1;
+    camera.pos.y = camera.pos.y - 1;
   }
   if (e.code === "ArrowDown") {
-    rect1y = rect1y + 1;
+    camera.pos.y = camera.pos.y + 1;
   }
-  if (rect1x < 0) rect1x = 0;
-  if (rect1x > buffer.width / tileW - canvas.width / tileW)
-    rect1x = buffer.width / tileW - canvas.width / tileW;
+  if (camera.pos.x < 0) camera.pos.x = 0;
+  if (camera.pos.x > buffer.width / tileW - canvas.width / tileW)
+    camera.pos.x = buffer.width / tileW - canvas.width / tileW;
 
-  if (rect1y < 0 - offsetRows) rect1y = 0 - offsetRows;
-  if (rect1y > buffer.height / tileH - canvas.height / tileH + offsetRows)
-    rect1y = buffer.height / tileH - canvas.height / tileH + offsetRows;
+  if (camera.pos.y < 0) camera.pos.y = 0;
+  if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
+    camera.pos.y = Math.ceil(rows - camera.visibleRows);
 
-  camera.offsetCol = rect1x;
-  camera.offsetRow = rect1y;
+  camera.offsetCol = camera.pos.x;
+  camera.offsetRow = camera.pos.y;
 
-  camera.offsetX = rect1x * tileW;
-  camera.offsetY = rect1y * tileH;
+  camera.offsetX = camera.pos.x * tileW;
+  camera.offsetY = camera.pos.y * tileH;
 
-  //console.log(rect1y);
+  //console.log(camera.pos.y);
 });
 
 grid.addEventListener("contextmenu", (e) => e.preventDefault());
