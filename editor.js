@@ -320,3 +320,6 @@ window.addEventListener("load", (e) => {
   scaledWidth = parseInt(cs.getPropertyValue("width"), 10);
   scaledHeight = parseInt(cs.getPropertyValue("height"), 10);
 });
+
+// tiles used in 32x32.png
+// 4,7,1,6,11,23,0,20,21,25,26,22,44,72,30,23
