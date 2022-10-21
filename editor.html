@@ -8,15 +8,35 @@
     <link type="text/css" rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
+    <div style="position: absolute; left: 40px; top: 40px; color: white">
+      <div id="col" style="display: inline-block">0</div>
+      <div id="row" style="display: inline-block">0</div>
+    </div>
+    <div style="position: absolute; left: 40px; top: 100px; color: white">
+      <div id="zoom" style="display: inline-block">1</div>
+    </div>
+    <div class="ctt">
+      <div class="ele1"></div>
+      <div class="ele2"></div>
+      <div class="ele3"></div>
+      <div class="ele4"></div>
+      <div class="ele5"></div>
+      <div class="ele6"></div>
+      <div class="ele1"></div>
+      <div class="ele2"></div>
+      <div class="ele3"></div>
+      <div class="ele4"></div>
+      <div class="ele5"></div>
+      <div class="ele6"></div>
+      <div class="ele1"></div>
+      <div class="ele2"></div>
+      <div class="ele3"></div>
+    </div>
     <div class="container editor">
       <canvas id="editor"></canvas>
-      <button id="btnScaleDown">-</button>
-      <button id="btnScaleUp">+</button>
-      <img
-        style="position: absolute; right: 20px; top: 20px"
-        src="./images/tiles.png"
-      />
+      <!-- <button id="btnScaleDown">-</button>
+      <button id="btnScaleUp">+</button> -->
     </div>
+    <script src="./editor.js"></script>
   </body>
-  <script src="./editor.js"></script>
 </html>

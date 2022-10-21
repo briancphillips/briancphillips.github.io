@@ -83,6 +83,11 @@ async function parseJson(url) {
   } catch (e) {}
 }
 
+//const tileSheet = document.querySelector("img");
+let tileSelected = 0;
+
+//for (x = 0; x < tileSheet.width; x += 32) {}
+
 const level = parseJson("./map.json").then((m) => {
   const layers = m.layers;
 
@@ -121,7 +126,7 @@ function drawGrid() {
   let s = 32 * zoom;
 
   //ctx.clearRect(0, 0, canvas.width, canvas.height);
-  gridCtx.strokeStyle = "rgba(255,255,255,0.5)";
+  gridCtx.strokeStyle = "rgba(255,255,255,0.8)";
   gridCtx.beginPath();
   for (let x = 0; x < grid.width; x += s) {
     gridCtx.moveTo(x, 0);
@@ -182,6 +187,7 @@ function scaleCanvas(scale) {
   drawGrid();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.scale(scale, scale);
+  document.querySelector("#zoom").textContent = zoom;
 }
 
 function highlightCell(pos) {
@@ -194,6 +200,8 @@ function highlightCell(pos) {
   );
   cursor.col = Math.floor(pos.x / (tileW * zoom) + camera.offsetCol);
   cursor.row = Math.floor(pos.y / (tileH * zoom) + camera.offsetRow);
+  document.querySelector("#col").textContent = cursor.col;
+  document.querySelector("#row").textContent = cursor.row;
 }
 
 function getMousePos(evt) {
@@ -208,14 +216,14 @@ function getMousePos(evt) {
 window.camera.pos.x = camera.pos.x;
 window.zoom = zoom;
 
-document.getElementById("btnScaleUp").addEventListener("click", (e) => {
-  zoom += 1;
-  scaleCanvas(zoom);
-});
-document.getElementById("btnScaleDown").addEventListener("click", (e) => {
-  zoom -= 1;
-  scaleCanvas(zoom);
-});
+// document.getElementById("btnScaleUp").addEventListener("click", (e) => {
+//   zoom += 1;
+//   scaleCanvas(zoom);
+// });
+// document.getElementById("btnScaleDown").addEventListener("click", (e) => {
+//   zoom -= 1;
+//   scaleCanvas(zoom);
+// });
 grid.addEventListener("mousemove", (e) => {
   let mousePosition = getMousePos(e);
 

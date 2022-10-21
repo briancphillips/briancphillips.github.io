@@ -24,6 +24,7 @@ canvas {
   height: 90vh;
   overflow: hidden;
   cursor: pointer;
+  border: 3px solid darkred;
 }
 canvas#editor {
   /* width: 1280px;
@@ -53,4 +54,59 @@ button {
 button:hover {
   background-color: #333333;
   color: white;
+}
+div.ctt {
+  cursor: pointer;
+  position: absolute;
+  right: 20px;
+  top: 60px;
+  background-image: url("../../images/tiles.png");
+  background-repeat: no-repeat;
+  display: grid;
+  /* background-color: black; */
+  grid-template-columns: repeat(5, 32px);
+  grid-template-rows: repeat(5, 32px);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+.ctt > div {
+  border: 1px solid black;
+}
+.ctt > div:hover {
+  border: 1px solid white;
+}
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 150%;
+  left: 50%;
+  margin-left: -60px;
+}
+
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
