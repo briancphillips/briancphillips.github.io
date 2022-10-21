@@ -1,5 +1,8 @@
-const grid = document.querySelector("canvas");
+const grid = document.querySelector("canvas#editor");
 const gridCtx = grid.getContext("2d");
+
+const miniCanvas = document.querySelector("#miniCanvas");
+const miniCtx = miniCanvas.getContext("2d");
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d");
@@ -30,6 +33,9 @@ buffer.height = tileH * 42;
 
 let scaledWidth = canvas.width;
 let scaledHeight = canvas.height;
+
+miniCanvas.width = 200;
+miniCanvas.height = 105;
 
 //canvas.setAttribute("style", "background-color:black");
 
@@ -162,6 +168,17 @@ function update() {
   );
 
   gridCtx.drawImage(canvas, 0, 0);
+  miniCtx.drawImage(
+    canvas,
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+    0,
+    0,
+    miniCanvas.width,
+    miniCanvas.height
+  );
   drawGrid();
   camera.update();
   //console.log(camera);
