@@ -6,11 +6,20 @@
 body {
   margin: 0;
 }
+div.test {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: black;
+  overflow: hidden;
+}
 div.container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+
   background-color: black;
   overflow: hidden;
 }
@@ -21,16 +30,18 @@ canvas#editor {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 90vh;
+  height: 50vh;
   overflow: hidden;
   cursor: pointer;
   border: 3px solid darkred;
+  margin-bottom: 40px;
 }
 canvas#editor {
   /* width: 1280px;
   height: 672px; */
 }
 canvas#miniCanvas {
+  display: flex;
   background-color: white;
   border: 3px solid darkred;
 }

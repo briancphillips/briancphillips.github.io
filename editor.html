@@ -8,6 +8,10 @@
     <link type="text/css" rel="stylesheet" href="./css/styles.css" />
   </head>
   <body>
+    <div class="test">
+      <canvas id="editor"></canvas>
+      <canvas id="miniCanvas"></canvas>
+    </div>
     <div style="position: absolute; left: 40px; top: 40px; color: white">
       <div id="col" style="display: inline-block">0</div>
       <div id="row" style="display: inline-block">0</div>
@@ -33,14 +37,10 @@
       <div class="ele3"></div>
     </div>
     <div class="container editor">
-      <canvas id="editor"></canvas>
       <!-- <button id="btnScaleDown">-</button>
       <button id="btnScaleUp">+</button> -->
     </div>
-    <canvas
-      id="miniCanvas"
-      style="position: absolute; bottom: 40px; right: 40px"
-    ></canvas>
+
     <script src="./editor.js"></script>
   </body>
 </html>

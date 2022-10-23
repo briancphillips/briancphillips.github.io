@@ -19,6 +19,7 @@ let prevRect1x = 0;
 let prevRect1y = 0;
 
 let cols = 546;
+let displayCols = 40;
 let rows = 42;
 let MOUSE_DOWN = false;
 
@@ -34,8 +35,8 @@ buffer.height = tileH * 42;
 let scaledWidth = canvas.width;
 let scaledHeight = canvas.height;
 
-miniCanvas.width = 200;
-miniCanvas.height = 105;
+miniCanvas.width = 1280;
+miniCanvas.height = tileW;
 
 //canvas.setAttribute("style", "background-color:black");
 
@@ -112,6 +113,7 @@ const level = parseJson("./map.json").then((m) => {
         const tilemapX = (element - 1) % tileMapCols;
         const tileMapY = Math.floor((element - 1) / tileMapCols);
         matrix[row][col] = element - 1;
+
         bufferCtx.drawImage(
           img,
           tilemapX * tileW,
@@ -168,17 +170,28 @@ function update() {
   );
 
   gridCtx.drawImage(canvas, 0, 0);
+
   miniCtx.drawImage(
-    canvas,
+    buffer,
     0,
     0,
-    canvas.width,
-    canvas.height,
+    buffer.width,
+    buffer.height,
     0,
     0,
     miniCanvas.width,
     miniCanvas.height
   );
+  miniCtx.fillStyle = "rgba(0,255,0,.2)";
+
+  miniCtx.fillRect(
+    camera.pos.x * (miniCanvas.width / cols) +
+      displayCols * (miniCanvas.width / cols),
+    0,
+    displayCols * (miniCanvas.width / cols) * -1,
+    miniCanvas.height
+  );
+
   drawGrid();
   camera.update();
   //console.log(camera);
