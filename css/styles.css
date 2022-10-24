@@ -30,10 +30,10 @@ canvas#editor {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh;
+  height: 70vh;
   overflow: hidden;
   cursor: pointer;
-  border: 3px solid darkred;
+  border: 3px solid #222222;
   margin-bottom: 40px;
 }
 canvas#editor {
@@ -43,7 +43,7 @@ canvas#editor {
 canvas#miniCanvas {
   display: flex;
   background-color: white;
-  border: 3px solid darkred;
+  border: 3px solid #222222;
 }
 pre {
   color: white;

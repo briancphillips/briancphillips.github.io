@@ -21,6 +21,8 @@ let prevRect1y = 0;
 let cols = 546;
 let displayCols = 40;
 let rows = 42;
+let displayRows = 21;
+
 let MOUSE_DOWN = false;
 
 const matrix = new Array(rows).fill(0).map(() => new Array(cols).fill(0));
@@ -35,7 +37,7 @@ buffer.height = tileH * 42;
 let scaledWidth = canvas.width;
 let scaledHeight = canvas.height;
 
-miniCanvas.width = 1280;
+miniCanvas.width = scaledWidth;
 miniCanvas.height = tileW;
 
 //canvas.setAttribute("style", "background-color:black");
@@ -182,14 +184,26 @@ function update() {
     miniCanvas.width,
     miniCanvas.height
   );
-  miniCtx.fillStyle = "rgba(0,255,0,.2)";
+
+  miniCtx.fillStyle = "rgba(0,0,255,.7)";
 
   miniCtx.fillRect(
     camera.pos.x * (miniCanvas.width / cols) +
-      displayCols * (miniCanvas.width / cols),
+      (displayCols / zoom) * (miniCanvas.width / cols),
     0,
-    displayCols * (miniCanvas.width / cols) * -1,
+    (displayCols / zoom) * (miniCanvas.width / cols) * -1,
     miniCanvas.height
+  );
+
+  miniCtx.fillStyle = "rgba(0,255,0,.4)";
+
+  miniCtx.fillRect(
+    camera.pos.x * (miniCanvas.width / cols) +
+      (displayCols / zoom) * (miniCanvas.width / cols),
+    camera.pos.y * (miniCanvas.height / rows) +
+      (displayRows / zoom) * (miniCanvas.height / rows),
+    (displayCols / zoom) * (miniCanvas.width / cols) * -1,
+    (displayRows / zoom) * (miniCanvas.height / rows) * -1
   );
 
   drawGrid();
@@ -352,11 +366,13 @@ window.addEventListener("resize", (e) => {
   const cs = getComputedStyle(grid);
   scaledWidth = parseInt(cs.getPropertyValue("width"), 10);
   scaledHeight = parseInt(cs.getPropertyValue("height"), 10);
+  miniCanvas.width = scaledWidth;
 });
 window.addEventListener("load", (e) => {
   const cs = getComputedStyle(grid);
   scaledWidth = parseInt(cs.getPropertyValue("width"), 10);
   scaledHeight = parseInt(cs.getPropertyValue("height"), 10);
+  miniCanvas.width = scaledWidth;
 });
 
 // tiles used in 32x32.png
