@@ -15,6 +15,7 @@ let tileH = 32;
 
 let zoom = 1;
 let mouseX, mouseY;
+let miniMouseX, miniMouseY;
 let prevRect1x = 0;
 let prevRect1y = 0;
 
@@ -37,8 +38,8 @@ buffer.height = tileH * 42;
 let scaledWidth = canvas.width;
 let scaledHeight = canvas.height;
 
-miniCanvas.width = scaledWidth;
-miniCanvas.height = tileW;
+miniCanvas.width = 0;
+miniCanvas.height = tileH;
 
 //canvas.setAttribute("style", "background-color:black");
 
@@ -69,7 +70,72 @@ class Camera {
     this.visibleRows = canvas.height / (tileH * zoom);
   }
 }
+class Minimap {
+  constructor() {
+    this.w = 0;
+    this.h = 0;
+    this.cursorX = 0;
+    this.cursorY = 0;
+    this.cursorW = 0;
+    this.cursorH = 0;
+    this.cursorViewX = 0;
+    this.cursorViewY = 0;
+    this.cursorViewW = 0;
+    this.cursorViewH = 0;
+  }
 
+  draw() {
+    miniCtx.drawImage(
+      buffer,
+      0,
+      0,
+      buffer.width,
+      buffer.height,
+      0,
+      0,
+      miniCanvas.width,
+      miniCanvas.height
+    );
+    miniCtx.fillStyle = "rgba(100,100,100,.2)";
+
+    miniCtx.fillRect(this.cursorX, this.cursorY, this.cursorW, this.cursorH);
+
+    miniCtx.fillStyle = "rgba(0,255,0,.4)";
+
+    miniCtx.fillRect(
+      this.cursorViewX,
+      this.cursorViewY,
+      this.cursorViewW,
+      this.cursorViewH
+    );
+  }
+
+  update() {
+    this.cursorX =
+      camera.pos.x * (miniCanvas.width / cols) +
+      (displayCols / zoom) * (miniCanvas.width / cols);
+    this.cursorY = 0;
+    this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols) * -1;
+    this.cursorH = miniCanvas.height;
+    this.cursorViewX =
+      camera.pos.x * (miniCanvas.width / cols) +
+      (displayCols / zoom) * (miniCanvas.width / cols);
+    this.cursorViewY =
+      camera.pos.y * (miniCanvas.height / rows) +
+      (displayRows / zoom) * (miniCanvas.height / rows);
+    this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols) * -1;
+    this.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows) * -1;
+    document.querySelector("#miniCol").textContent = Math.floor(
+      this.cursorX + this.cursorW
+    );
+    document.querySelector("#miniRow").textContent = Math.floor(
+      this.cursorViewY + this.cursorViewH
+    );
+    document.querySelector("#miniRow2").textContent = camera.pos.x;
+
+    this.draw();
+  }
+}
 function loadImage(url) {
   return new Promise((resolve) => {
     const image = new Image();
@@ -155,6 +221,7 @@ function drawGrid() {
 
 const camera = new Camera();
 const cursor = new Cursor();
+const miniMap = new Minimap();
 window.camera = camera;
 function update() {
   ctx.fillStyle = "black";
@@ -172,40 +239,7 @@ function update() {
   );
 
   gridCtx.drawImage(canvas, 0, 0);
-
-  miniCtx.drawImage(
-    buffer,
-    0,
-    0,
-    buffer.width,
-    buffer.height,
-    0,
-    0,
-    miniCanvas.width,
-    miniCanvas.height
-  );
-
-  miniCtx.fillStyle = "rgba(0,0,255,.7)";
-
-  miniCtx.fillRect(
-    camera.pos.x * (miniCanvas.width / cols) +
-      (displayCols / zoom) * (miniCanvas.width / cols),
-    0,
-    (displayCols / zoom) * (miniCanvas.width / cols) * -1,
-    miniCanvas.height
-  );
-
-  miniCtx.fillStyle = "rgba(0,255,0,.4)";
-
-  miniCtx.fillRect(
-    camera.pos.x * (miniCanvas.width / cols) +
-      (displayCols / zoom) * (miniCanvas.width / cols),
-    camera.pos.y * (miniCanvas.height / rows) +
-      (displayRows / zoom) * (miniCanvas.height / rows),
-    (displayCols / zoom) * (miniCanvas.width / cols) * -1,
-    (displayRows / zoom) * (miniCanvas.height / rows) * -1
-  );
-
+  miniMap.update();
   drawGrid();
   camera.update();
   //console.log(camera);
@@ -248,8 +282,8 @@ function highlightCell(pos) {
   document.querySelector("#row").textContent = cursor.row;
 }
 
-function getMousePos(evt) {
-  let rect = grid.getBoundingClientRect();
+function getMousePos(evt, src) {
+  let rect = src.getBoundingClientRect();
 
   return {
     x: evt.clientX - rect.left,
@@ -269,7 +303,7 @@ window.zoom = zoom;
 //   scaleCanvas(zoom);
 // });
 grid.addEventListener("mousemove", (e) => {
-  let mousePosition = getMousePos(e);
+  let mousePosition = getMousePos(e, grid);
 
   mouseX = mousePosition.x;
   mouseY = mousePosition.y;
@@ -361,6 +395,60 @@ window.addEventListener("keydown", (e) => {
 });
 
 grid.addEventListener("contextmenu", (e) => e.preventDefault());
+miniCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+miniCanvas.addEventListener("mousemove", (e) => {
+  let mousePosition = getMousePos(e, miniCanvas);
+
+  miniMouseX = mousePosition.x;
+  miniMouseY = mousePosition.y;
+  console.log(miniMouseX, miniMouseY);
+  if (MOUSE_DOWN) {
+    miniCanvas.setAttribute("style", "cursor: all-scroll");
+    miniMap.cursorX = miniMouseX;
+
+    // camera.pos.x = camera.pos.x - e.movementX;
+    // camera.pos.y = camera.pos.y - e.movementY;
+
+    // if (camera.pos.x < 0) camera.pos.x = 0;
+    // if (camera.pos.x >= Math.ceil(cols - camera.visibleCols))
+    //   camera.pos.x = Math.ceil(cols - camera.visibleCols);
+
+    // if (camera.pos.y < 0) camera.pos.y = 0;
+    // if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
+    //   camera.pos.y = Math.ceil(rows - camera.visibleRows);
+
+    // camera.offsetCol = camera.pos.x;
+    // camera.offsetRow = camera.pos.y;
+
+    // camera.offsetX = camera.pos.x * tileW;
+    // camera.offsetY = camera.pos.y * tileH;
+  }
+});
+miniCanvas.addEventListener("click", (e) => {
+  // console.log(cursor);
+  // console.log(matrix[cursor.row][cursor.col]);
+  // bufferCtx.fillStyle = "blue";
+  // bufferCtx.fillRect(cursor.col * tileW, cursor.row * tileH, 32, 32);
+});
+miniCanvas.addEventListener("mouseup", (e) => {
+  MOUSE_DOWN = false;
+  miniCanvas.removeAttribute("style", "cursor: all-scroll");
+  // prevRect1x = camera.pos.x;
+  // prevRect1y = camera.pos.y;
+});
+
+miniCanvas.addEventListener("mouseleave", (e) => {
+  MOUSE_DOWN = false;
+});
+
+miniCanvas.addEventListener("mousedown", (e) => {
+  if (MOUSE_DOWN) {
+    MOUSE_DOWN = false;
+  } else {
+    if (e.button === 0) MOUSE_DOWN = true;
+  }
+});
 
 window.addEventListener("resize", (e) => {
   const cs = getComputedStyle(grid);

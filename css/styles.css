@@ -44,6 +44,7 @@ canvas#miniCanvas {
   display: flex;
   background-color: white;
   border: 3px solid #222222;
+  cursor: pointer;
 }
 pre {
   color: white;
