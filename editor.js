@@ -15,7 +15,8 @@ let tileH = 32;
 
 let zoom = 1;
 let mouseX, mouseY;
-let miniMouseX, miniMouseY;
+let miniMouseX = 0;
+let miniMouseY = 0;
 let prevRect1x = 0;
 let prevRect1y = 0;
 
@@ -96,15 +97,20 @@ class Minimap {
       miniCanvas.width,
       miniCanvas.height
     );
-    miniCtx.fillStyle = "rgba(100,100,100,.3)";
+    miniCtx.fillStyle = "rgba(100,100,100,.6)";
 
-    miniCtx.fillRect(this.cursorX, this.cursorY, this.cursorW, this.cursorH);
+    miniCtx.fillRect(
+      this.cursorX - this.cursorW,
+      this.cursorY,
+      this.cursorW,
+      this.cursorH
+    );
 
     miniCtx.fillStyle = "rgba(255,255,255,.4)";
 
     miniCtx.fillRect(
-      this.cursorViewX,
-      this.cursorViewY,
+      this.cursorViewX - this.cursorViewW,
+      this.cursorViewY - this.cursorViewH,
       this.cursorViewW,
       this.cursorViewH
     );
@@ -115,7 +121,7 @@ class Minimap {
       camera.pos.x * (miniCanvas.width / cols) +
       (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorY = 0;
-    this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols) * -1;
+    this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorH = miniCanvas.height;
     this.cursorViewX =
       camera.pos.x * (miniCanvas.width / cols) +
@@ -123,8 +129,8 @@ class Minimap {
     this.cursorViewY =
       camera.pos.y * (miniCanvas.height / rows) +
       (displayRows / zoom) * (miniCanvas.height / rows);
-    this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols) * -1;
-    this.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows) * -1;
+    this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+    this.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
     document.querySelector("#miniCol").textContent = Math.floor(
       this.cursorX + this.cursorW
     );
@@ -307,7 +313,7 @@ grid.addEventListener("mousemove", (e) => {
 
   mouseX = mousePosition.x;
   mouseY = mousePosition.y;
-
+  console.log(miniMap.cursorX - miniMap.cursorW, camera.pos.x);
   if (MOUSE_DOWN) {
     grid.setAttribute("style", "cursor: all-scroll");
     camera.pos.x = camera.pos.x - e.movementX;
@@ -329,8 +335,8 @@ grid.addEventListener("mousemove", (e) => {
   }
 });
 grid.addEventListener("click", (e) => {
-  console.log(cursor);
-  console.log(matrix[cursor.row][cursor.col]);
+  //console.log(cursor);
+  //console.log(matrix[cursor.row][cursor.col]);
   // bufferCtx.fillStyle = "blue";
   // bufferCtx.fillRect(cursor.col * tileW, cursor.row * tileH, 32, 32);
 });
@@ -405,7 +411,7 @@ miniCanvas.addEventListener("mousemove", (e) => {
   miniMouseY = mousePosition.y;
 
   if (MOUSE_DOWN) {
-    console.log(miniMouseX, miniMouseY);
+    //console.log(miniMouseX, miniMouseY);
     miniCanvas.setAttribute("style", "cursor: all-scroll");
     miniMap.cursorX = miniMouseX;
 
@@ -468,7 +474,7 @@ window.addEventListener("load", (e) => {
 
 window.addEventListener("mousemove", (e) => {
   grid.onmouseover = (e) => {
-    console.log("over grid");
+    //console.log("over grid");
   };
 });
 // tiles used in 32x32.png
