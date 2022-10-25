@@ -467,9 +467,9 @@ window.addEventListener("load", (e) => {
 });
 
 window.addEventListener("mousemove", (e) => {
-  canvas.onmouseover((e) => {
+  grid.onmouseover = (e) => {
     console.log("over grid");
-  });
+  };
 });
 // tiles used in 32x32.png
 // 4,7,1,6,11,23,0,20,21,25,26,22,44,72,30,23
