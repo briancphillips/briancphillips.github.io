@@ -96,11 +96,11 @@ class Minimap {
       miniCanvas.width,
       miniCanvas.height
     );
-    miniCtx.fillStyle = "rgba(100,100,100,.2)";
+    miniCtx.fillStyle = "rgba(100,100,100,.3)";
 
     miniCtx.fillRect(this.cursorX, this.cursorY, this.cursorW, this.cursorH);
 
-    miniCtx.fillStyle = "rgba(0,255,0,.4)";
+    miniCtx.fillStyle = "rgba(255,255,255,.4)";
 
     miniCtx.fillRect(
       this.cursorViewX,
@@ -336,6 +336,7 @@ grid.addEventListener("click", (e) => {
 });
 grid.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
+
   grid.removeAttribute("style", "cursor: all-scroll");
   prevRect1x = camera.pos.x;
   prevRect1y = camera.pos.y;
@@ -402,8 +403,9 @@ miniCanvas.addEventListener("mousemove", (e) => {
 
   miniMouseX = mousePosition.x;
   miniMouseY = mousePosition.y;
-  console.log(miniMouseX, miniMouseY);
+
   if (MOUSE_DOWN) {
+    console.log(miniMouseX, miniMouseY);
     miniCanvas.setAttribute("style", "cursor: all-scroll");
     miniMap.cursorX = miniMouseX;
 
@@ -433,6 +435,7 @@ miniCanvas.addEventListener("click", (e) => {
 });
 miniCanvas.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
+
   miniCanvas.removeAttribute("style", "cursor: all-scroll");
   // prevRect1x = camera.pos.x;
   // prevRect1y = camera.pos.y;
@@ -463,5 +466,10 @@ window.addEventListener("load", (e) => {
   miniCanvas.width = scaledWidth;
 });
 
+window.addEventListener("mousemove", (e) => {
+  canvas.onmouseover((e) => {
+    console.log("over grid");
+  });
+});
 // tiles used in 32x32.png
 // 4,7,1,6,11,23,0,20,21,25,26,22,44,72,30,23
