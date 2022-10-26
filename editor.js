@@ -14,7 +14,8 @@ let tileW = 32;
 let tileH = 32;
 
 let zoom = 1;
-let mouseX, mouseY;
+let mouseX = 0;
+let mouseY = 0;
 let miniMouseX = 0;
 let miniMouseY = 0;
 let prevRect1x = 0;
@@ -41,8 +42,6 @@ let scaledHeight = canvas.height;
 
 miniCanvas.width = 0;
 miniCanvas.height = tileH;
-
-//canvas.setAttribute("style", "background-color:black");
 
 ctx.strokeStyle = "red";
 ctx.strokeRect(0, 0, canvas.width, canvas.height);
@@ -84,6 +83,18 @@ class Minimap {
     this.cursorViewW = 61;
     this.cursorViewH = miniCanvas.height;
   }
+  updateViewport() {
+    miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorH = miniCanvas.height;
+    miniMap.cursorViewX =
+      camera.pos.x * (miniCanvas.width / cols) -
+      (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorViewY =
+      camera.pos.y * (miniCanvas.height / rows) +
+      (displayRows / zoom) * (miniCanvas.height / rows);
+    miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+  }
 
   draw() {
     miniCtx.drawImage(
@@ -97,7 +108,7 @@ class Minimap {
       miniCanvas.width,
       miniCanvas.height
     );
-    //console.log(this.cursorViewW);
+    
     miniCtx.fillStyle = "rgba(100,100,100,.6)";
 
     miniCtx.fillRect(this.cursorX, 0, this.cursorW, this.cursorH);
@@ -138,17 +149,14 @@ async function parseJson(url) {
   } catch (e) {}
 }
 
-//const tileSheet = document.querySelector("img");
-let tileSelected = 0;
 
-//for (x = 0; x < tileSheet.width; x += 32) {}
+let tileSelected = 0;
 
 const level = parseJson("./map.json").then((m) => {
   const layers = m.layers;
 
   const tileMapCols = 8;
 
-  //console.log(matrix); // 0
 
   bufferCtx.fillStyle = "black";
   bufferCtx.fillRect(0, 0, buffer.width, buffer.height);
@@ -181,7 +189,7 @@ const level = parseJson("./map.json").then((m) => {
 function drawGrid() {
   let s = 32 * zoom;
 
-  //ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
   gridCtx.strokeStyle = "rgba(255,255,255,0.8)";
   gridCtx.beginPath();
   for (let x = 0; x < grid.width; x += s) {
@@ -222,14 +230,13 @@ function update() {
   miniMap.update();
   drawGrid();
   camera.update();
-  //console.log(camera);
+ 
   window.requestAnimationFrame(update);
 }
 update();
 
 function scaleCanvas(scale) {
-  // prevRect1x = camera.pos.x;
-  // prevRect1y = camera.pos.y;
+  
 
   if (zoom < 1) {
     zoom = 1;
@@ -274,20 +281,13 @@ function getMousePos(evt, src) {
 window.camera.pos.x = camera.pos.x;
 window.zoom = zoom;
 window.miniMap = miniMap;
-// document.getElementById("btnScaleUp").addEventListener("click", (e) => {
-//   zoom += 1;
-//   scaleCanvas(zoom);
-// });
-// document.getElementById("btnScaleDown").addEventListener("click", (e) => {
-//   zoom -= 1;
-//   scaleCanvas(zoom);
-// });
+
 grid.addEventListener("mousemove", (e) => {
   let mousePosition = getMousePos(e, grid);
 
   mouseX = mousePosition.x;
   mouseY = mousePosition.y;
-  //console.log(miniMap.cursorX - miniMap.cursorW, camera.pos.x);
+  
   if (MOUSE_DOWN) {
     grid.setAttribute("style", "cursor: all-scroll");
     camera.pos.x = camera.pos.x - e.movementX;
@@ -312,16 +312,7 @@ grid.addEventListener("mousemove", (e) => {
       (displayCols / zoom) * (miniCanvas.width / cols) -
       miniMap.cursorW;
     miniMap.cursorY = 0;
-    miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorH = miniCanvas.height;
-    miniMap.cursorViewX =
-      camera.pos.x * (miniCanvas.width / cols) -
-      (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorViewY =
-      camera.pos.y * (miniCanvas.height / rows) +
-      (displayRows / zoom) * (miniCanvas.height / rows);
-    miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+    miniMap.updateViewport();
     document.querySelector("#miniCol").textContent = Math.floor(
       miniMap.cursorX + miniMap.cursorW
     );
@@ -331,12 +322,7 @@ grid.addEventListener("mousemove", (e) => {
     document.querySelector("#miniRow2").textContent = camera.pos.x;
   }
 });
-grid.addEventListener("click", (e) => {
-  //console.log(cursor);
-  //console.log(matrix[cursor.row][cursor.col]);
-  // bufferCtx.fillStyle = "blue";
-  // bufferCtx.fillRect(cursor.col * tileW, cursor.row * tileH, 32, 32);
-});
+
 grid.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
 
@@ -361,14 +347,18 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "Digit0") {
     zoom = 1;
     scaleCanvas(zoom);
+    miniMap.update();
+    miniMap.updateViewport();
   }
   if (e.code === "Minus") {
     zoom -= 1;
     scaleCanvas(zoom);
+    miniMap.updateViewport();
   }
   if (e.code === "Equal") {
     zoom += 1;
     scaleCanvas(zoom);
+    miniMap.updateViewport();
   }
 
   if (e.code === "ArrowLeft") {
@@ -407,8 +397,6 @@ miniCanvas.addEventListener("click", (e) => {
   miniMouseX = mousePosition.x;
   miniMouseY = mousePosition.y;
 
-  console.log(Math.floor(miniMap.cursorX));
-  miniCanvas.setAttribute("style", "cursor: all-scroll");
   miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
   miniMap.cursorH = miniCanvas.height;
   miniMap.cursorX = miniMouseX - miniMap.cursorW / 2;
@@ -429,21 +417,13 @@ miniCanvas.addEventListener("click", (e) => {
 
   camera.pos.x = Math.floor(miniMap.cursorX * (cols / miniCanvas.width));
   camera.pos.y = Math.floor(miniMap.cursorY * (rows / miniCanvas.height));
-  // camera.pos.y = camera.pos.y - e.movementY;
 
-  // if (camera.pos.x < 0) camera.pos.x = 0;
-  // if (camera.pos.x >= Math.ceil(cols - camera.visibleCols))
-  //   camera.pos.x = Math.ceil(cols - camera.visibleCols);
 
   if (camera.pos.y < 0) camera.pos.y = 0;
   if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
     camera.pos.y = Math.ceil(rows - camera.visibleRows);
 
-  // camera.offsetCol = camera.pos.x;
-  // camera.offsetRow = camera.pos.y;
 
-  // camera.offsetX = camera.pos.x * tileW;
-  // camera.offsetY = camera.pos.y * tileH;
 });
 
 miniCanvas.addEventListener("mousemove", (e) => {
@@ -475,21 +455,11 @@ miniCanvas.addEventListener("mousemove", (e) => {
 
     camera.pos.x = Math.floor(miniMap.cursorX * (cols / miniCanvas.width));
     camera.pos.y = Math.floor(miniMap.cursorY * (rows / miniCanvas.height));
-    // camera.pos.y = camera.pos.y - e.movementY;
-
-    // if (camera.pos.x < 0) camera.pos.x = 0;
-    // if (camera.pos.x >= Math.ceil(cols - camera.visibleCols))
-    //   camera.pos.x = Math.ceil(cols - camera.visibleCols);
+    
 
     if (camera.pos.y < 0) camera.pos.y = 0;
     if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
       camera.pos.y = Math.ceil(rows - camera.visibleRows);
-
-    // camera.offsetCol = camera.pos.x;
-    // camera.offsetRow = camera.pos.y;
-
-    // camera.offsetX = camera.pos.x * tileW;
-    // camera.offsetY = camera.pos.y * tileH;
   }
 });
 
@@ -497,8 +467,7 @@ miniCanvas.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
 
   miniCanvas.removeAttribute("style", "cursor: all-scroll");
-  // prevRect1x = camera.pos.x;
-  // prevRect1y = camera.pos.y;
+  
 });
 
 window.addEventListener("mouseup", (e) => {
@@ -506,13 +475,8 @@ window.addEventListener("mouseup", (e) => {
   grid.removeAttribute("style", "cursor: all-scroll");
 
   miniCanvas.removeAttribute("style", "cursor: all-scroll");
-  // prevRect1x = camera.pos.x;
-  // prevRect1y = camera.pos.y;
+  
 });
-
-// miniCanvas.addEventListener("mouseleave", (e) => {
-//   MOUSE_DOWN = false;
-// });
 
 miniCanvas.addEventListener("mousedown", (e) => {
   if (MOUSE_DOWN) {
@@ -537,7 +501,7 @@ window.addEventListener("load", (e) => {
 
 window.addEventListener("mousemove", (e) => {
   grid.onmouseover = (e) => {
-    //console.log("over grid");
+    
   };
 });
 
