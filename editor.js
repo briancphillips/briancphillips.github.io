@@ -287,7 +287,7 @@ grid.addEventListener("mousemove", (e) => {
 
   mouseX = mousePosition.x;
   mouseY = mousePosition.y;
-  console.log(miniMap.cursorX - miniMap.cursorW, camera.pos.x);
+  //console.log(miniMap.cursorX - miniMap.cursorW, camera.pos.x);
   if (MOUSE_DOWN) {
     grid.setAttribute("style", "cursor: all-scroll");
     camera.pos.x = camera.pos.x - e.movementX;
@@ -408,7 +408,7 @@ miniCanvas.addEventListener("mousemove", (e) => {
   miniMouseY = mousePosition.y;
 
   if (MOUSE_DOWN) {
-    //console.log(miniMap.cursorX, miniCanvas.height);
+    console.log(Math.floor(miniMap.cursorX));
     miniCanvas.setAttribute("style", "cursor: all-scroll");
     miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
     miniMap.cursorH = miniCanvas.height;
@@ -428,16 +428,17 @@ miniCanvas.addEventListener("mousemove", (e) => {
     miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
     miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
 
-    // camera.pos.x = camera.pos.x - e.movementX;
+    camera.pos.x = Math.floor(miniMap.cursorX * (cols / miniCanvas.width));
+    camera.pos.y = Math.floor(miniMap.cursorY * (rows / miniCanvas.height));
     // camera.pos.y = camera.pos.y - e.movementY;
 
     // if (camera.pos.x < 0) camera.pos.x = 0;
     // if (camera.pos.x >= Math.ceil(cols - camera.visibleCols))
     //   camera.pos.x = Math.ceil(cols - camera.visibleCols);
 
-    // if (camera.pos.y < 0) camera.pos.y = 0;
-    // if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
-    //   camera.pos.y = Math.ceil(rows - camera.visibleRows);
+    if (camera.pos.y < 0) camera.pos.y = 0;
+    if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
+      camera.pos.y = Math.ceil(rows - camera.visibleRows);
 
     // camera.offsetCol = camera.pos.x;
     // camera.offsetRow = camera.pos.y;
