@@ -76,13 +76,13 @@ class Minimap {
     this.w = 0;
     this.h = 0;
     this.cursorX = 0;
-    this.cursorY = 0;
-    this.cursorW = 0;
-    this.cursorH = 0;
-    this.cursorViewX = 0;
-    this.cursorViewY = 0;
-    this.cursorViewW = 0;
-    this.cursorViewH = 0;
+    this.cursorY = miniCanvas.height / 2;
+    this.cursorW = 61;
+    this.cursorH = miniCanvas.height;
+    this.cursorViewX = -61;
+    this.cursorViewY = miniCanvas.height / 2;
+    this.cursorViewW = 61;
+    this.cursorViewH = miniCanvas.height;
   }
 
   draw() {
@@ -97,19 +97,15 @@ class Minimap {
       miniCanvas.width,
       miniCanvas.height
     );
+    //console.log(this.cursorViewW);
     miniCtx.fillStyle = "rgba(100,100,100,.6)";
 
-    miniCtx.fillRect(
-      this.cursorX - this.cursorW,
-      this.cursorY,
-      this.cursorW,
-      this.cursorH
-    );
+    miniCtx.fillRect(this.cursorX, 0, this.cursorW, this.cursorH);
 
     miniCtx.fillStyle = "rgba(255,255,255,.4)";
 
     miniCtx.fillRect(
-      this.cursorViewX - this.cursorViewW,
+      this.cursorViewX + this.cursorViewW,
       this.cursorViewY - this.cursorViewH,
       this.cursorViewW,
       this.cursorViewH
@@ -117,28 +113,6 @@ class Minimap {
   }
 
   update() {
-    this.cursorX =
-      camera.pos.x * (miniCanvas.width / cols) +
-      (displayCols / zoom) * (miniCanvas.width / cols);
-    this.cursorY = 0;
-    this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
-    this.cursorH = miniCanvas.height;
-    this.cursorViewX =
-      camera.pos.x * (miniCanvas.width / cols) +
-      (displayCols / zoom) * (miniCanvas.width / cols);
-    this.cursorViewY =
-      camera.pos.y * (miniCanvas.height / rows) +
-      (displayRows / zoom) * (miniCanvas.height / rows);
-    this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
-    this.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
-    document.querySelector("#miniCol").textContent = Math.floor(
-      this.cursorX + this.cursorW
-    );
-    document.querySelector("#miniRow").textContent = Math.floor(
-      this.cursorViewY + this.cursorViewH
-    );
-    document.querySelector("#miniRow2").textContent = camera.pos.x;
-
     this.draw();
   }
 }
@@ -299,7 +273,7 @@ function getMousePos(evt, src) {
 
 window.camera.pos.x = camera.pos.x;
 window.zoom = zoom;
-
+window.miniMap = miniMap;
 // document.getElementById("btnScaleUp").addEventListener("click", (e) => {
 //   zoom += 1;
 //   scaleCanvas(zoom);
@@ -332,6 +306,29 @@ grid.addEventListener("mousemove", (e) => {
 
     camera.offsetX = camera.pos.x * tileW;
     camera.offsetY = camera.pos.y * tileH;
+
+    miniMap.cursorX =
+      camera.pos.x * (miniCanvas.width / cols) +
+      (displayCols / zoom) * (miniCanvas.width / cols) -
+      miniMap.cursorW;
+    miniMap.cursorY = 0;
+    miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorH = miniCanvas.height;
+    miniMap.cursorViewX =
+      camera.pos.x * (miniCanvas.width / cols) -
+      (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorViewY =
+      camera.pos.y * (miniCanvas.height / rows) +
+      (displayRows / zoom) * (miniCanvas.height / rows);
+    miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+    document.querySelector("#miniCol").textContent = Math.floor(
+      miniMap.cursorX + miniMap.cursorW
+    );
+    document.querySelector("#miniRow").textContent = Math.floor(
+      miniMap.cursorViewY + miniMap.cursorViewH
+    );
+    document.querySelector("#miniRow2").textContent = camera.pos.x;
   }
 });
 grid.addEventListener("click", (e) => {
@@ -411,9 +408,25 @@ miniCanvas.addEventListener("mousemove", (e) => {
   miniMouseY = mousePosition.y;
 
   if (MOUSE_DOWN) {
-    //console.log(miniMouseX, miniMouseY);
+    //console.log(miniMap.cursorX, miniCanvas.height);
     miniCanvas.setAttribute("style", "cursor: all-scroll");
-    miniMap.cursorX = miniMouseX;
+    miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorH = miniCanvas.height;
+    miniMap.cursorX = miniMouseX - miniMap.cursorW / 2;
+
+    if (miniMap.cursorX <= 0) miniMap.cursorX = 0;
+    if (miniMap.cursorX >= miniCanvas.width - miniMap.cursorW)
+      miniMap.cursorX = miniCanvas.width - miniMap.cursorW;
+
+    miniMap.cursorY = miniMouseY;
+    miniMap.cursorViewX = miniMap.cursorX - miniMap.cursorW;
+
+    miniMap.cursorViewY = miniMap.cursorY + miniMap.cursorH / 2;
+    if (miniMap.cursorViewY >= miniCanvas.height)
+      miniMap.cursorViewY = miniCanvas.height;
+
+    miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
 
     // camera.pos.x = camera.pos.x - e.movementX;
     // camera.pos.y = camera.pos.y - e.movementY;
@@ -447,9 +460,18 @@ miniCanvas.addEventListener("mouseup", (e) => {
   // prevRect1y = camera.pos.y;
 });
 
-miniCanvas.addEventListener("mouseleave", (e) => {
+window.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
+  grid.removeAttribute("style", "cursor: all-scroll");
+
+  miniCanvas.removeAttribute("style", "cursor: all-scroll");
+  // prevRect1x = camera.pos.x;
+  // prevRect1y = camera.pos.y;
 });
+
+// miniCanvas.addEventListener("mouseleave", (e) => {
+//   MOUSE_DOWN = false;
+// });
 
 miniCanvas.addEventListener("mousedown", (e) => {
   if (MOUSE_DOWN) {
@@ -477,5 +499,6 @@ window.addEventListener("mousemove", (e) => {
     //console.log("over grid");
   };
 });
+
 // tiles used in 32x32.png
 // 4,7,1,6,11,23,0,20,21,25,26,22,44,72,30,23
