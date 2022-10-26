@@ -83,6 +83,26 @@ class Minimap {
     this.cursorViewW = 61;
     this.cursorViewH = miniCanvas.height;
   }
+
+  updateViewportOnClick() {
+    miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorH = miniCanvas.height;
+    miniMap.cursorX = miniMouseX - miniMap.cursorW / 2;
+
+    if (miniMap.cursorX <= 0) miniMap.cursorX = 0;
+    if (miniMap.cursorX >= miniCanvas.width - miniMap.cursorW)
+      miniMap.cursorX = miniCanvas.width - miniMap.cursorW;
+
+    miniMap.cursorY = miniMouseY;
+    miniMap.cursorViewX = miniMap.cursorX - miniMap.cursorW;
+
+    miniMap.cursorViewY = miniMap.cursorY + miniMap.cursorH / 2;
+    if (miniMap.cursorViewY >= miniCanvas.height)
+      miniMap.cursorViewY = miniCanvas.height;
+
+    miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+    miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+  }
   updateViewport() {
     miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
     miniMap.cursorH = miniCanvas.height;
@@ -108,7 +128,7 @@ class Minimap {
       miniCanvas.width,
       miniCanvas.height
     );
-    
+
     miniCtx.fillStyle = "rgba(100,100,100,.6)";
 
     miniCtx.fillRect(this.cursorX, 0, this.cursorW, this.cursorH);
@@ -149,14 +169,12 @@ async function parseJson(url) {
   } catch (e) {}
 }
 
-
 let tileSelected = 0;
 
 const level = parseJson("./map.json").then((m) => {
   const layers = m.layers;
 
   const tileMapCols = 8;
-
 
   bufferCtx.fillStyle = "black";
   bufferCtx.fillRect(0, 0, buffer.width, buffer.height);
@@ -189,7 +207,6 @@ const level = parseJson("./map.json").then((m) => {
 function drawGrid() {
   let s = 32 * zoom;
 
-  
   gridCtx.strokeStyle = "rgba(255,255,255,0.8)";
   gridCtx.beginPath();
   for (let x = 0; x < grid.width; x += s) {
@@ -230,14 +247,12 @@ function update() {
   miniMap.update();
   drawGrid();
   camera.update();
- 
+
   window.requestAnimationFrame(update);
 }
 update();
 
 function scaleCanvas(scale) {
-  
-
   if (zoom < 1) {
     zoom = 1;
     return;
@@ -287,7 +302,7 @@ grid.addEventListener("mousemove", (e) => {
 
   mouseX = mousePosition.x;
   mouseY = mousePosition.y;
-  
+
   if (MOUSE_DOWN) {
     grid.setAttribute("style", "cursor: all-scroll");
     camera.pos.x = camera.pos.x - e.movementX;
@@ -313,13 +328,6 @@ grid.addEventListener("mousemove", (e) => {
       miniMap.cursorW;
     miniMap.cursorY = 0;
     miniMap.updateViewport();
-    document.querySelector("#miniCol").textContent = Math.floor(
-      miniMap.cursorX + miniMap.cursorW
-    );
-    document.querySelector("#miniRow").textContent = Math.floor(
-      miniMap.cursorViewY + miniMap.cursorViewH
-    );
-    document.querySelector("#miniRow2").textContent = camera.pos.x;
   }
 });
 
@@ -397,33 +405,14 @@ miniCanvas.addEventListener("click", (e) => {
   miniMouseX = mousePosition.x;
   miniMouseY = mousePosition.y;
 
-  miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
-  miniMap.cursorH = miniCanvas.height;
-  miniMap.cursorX = miniMouseX - miniMap.cursorW / 2;
-
-  if (miniMap.cursorX <= 0) miniMap.cursorX = 0;
-  if (miniMap.cursorX >= miniCanvas.width - miniMap.cursorW)
-    miniMap.cursorX = miniCanvas.width - miniMap.cursorW;
-
-  miniMap.cursorY = miniMouseY;
-  miniMap.cursorViewX = miniMap.cursorX - miniMap.cursorW;
-
-  miniMap.cursorViewY = miniMap.cursorY + miniMap.cursorH / 2;
-  if (miniMap.cursorViewY >= miniCanvas.height)
-    miniMap.cursorViewY = miniCanvas.height;
-
-  miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
-  miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+  miniMap.updateViewportOnClick();
 
   camera.pos.x = Math.floor(miniMap.cursorX * (cols / miniCanvas.width));
   camera.pos.y = Math.floor(miniMap.cursorY * (rows / miniCanvas.height));
 
-
   if (camera.pos.y < 0) camera.pos.y = 0;
   if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
     camera.pos.y = Math.ceil(rows - camera.visibleRows);
-
-
 });
 
 miniCanvas.addEventListener("mousemove", (e) => {
@@ -455,7 +444,6 @@ miniCanvas.addEventListener("mousemove", (e) => {
 
     camera.pos.x = Math.floor(miniMap.cursorX * (cols / miniCanvas.width));
     camera.pos.y = Math.floor(miniMap.cursorY * (rows / miniCanvas.height));
-    
 
     if (camera.pos.y < 0) camera.pos.y = 0;
     if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
@@ -465,9 +453,9 @@ miniCanvas.addEventListener("mousemove", (e) => {
 
 miniCanvas.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
-
+  prevRect1x = camera.pos.x;
+  prevRect1y = camera.pos.y;
   miniCanvas.removeAttribute("style", "cursor: all-scroll");
-  
 });
 
 window.addEventListener("mouseup", (e) => {
@@ -475,7 +463,6 @@ window.addEventListener("mouseup", (e) => {
   grid.removeAttribute("style", "cursor: all-scroll");
 
   miniCanvas.removeAttribute("style", "cursor: all-scroll");
-  
 });
 
 miniCanvas.addEventListener("mousedown", (e) => {
@@ -500,9 +487,7 @@ window.addEventListener("load", (e) => {
 });
 
 window.addEventListener("mousemove", (e) => {
-  grid.onmouseover = (e) => {
-    
-  };
+  grid.onmouseover = (e) => {};
 });
 
 // tiles used in 32x32.png
