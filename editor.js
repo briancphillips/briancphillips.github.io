@@ -401,6 +401,51 @@ window.addEventListener("keydown", (e) => {
 grid.addEventListener("contextmenu", (e) => e.preventDefault());
 miniCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
+miniCanvas.addEventListener("click", (e) => {
+  let mousePosition = getMousePos(e, miniCanvas);
+
+  miniMouseX = mousePosition.x;
+  miniMouseY = mousePosition.y;
+
+  console.log(Math.floor(miniMap.cursorX));
+  miniCanvas.setAttribute("style", "cursor: all-scroll");
+  miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
+  miniMap.cursorH = miniCanvas.height;
+  miniMap.cursorX = miniMouseX - miniMap.cursorW / 2;
+
+  if (miniMap.cursorX <= 0) miniMap.cursorX = 0;
+  if (miniMap.cursorX >= miniCanvas.width - miniMap.cursorW)
+    miniMap.cursorX = miniCanvas.width - miniMap.cursorW;
+
+  miniMap.cursorY = miniMouseY;
+  miniMap.cursorViewX = miniMap.cursorX - miniMap.cursorW;
+
+  miniMap.cursorViewY = miniMap.cursorY + miniMap.cursorH / 2;
+  if (miniMap.cursorViewY >= miniCanvas.height)
+    miniMap.cursorViewY = miniCanvas.height;
+
+  miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+  miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+
+  camera.pos.x = Math.floor(miniMap.cursorX * (cols / miniCanvas.width));
+  camera.pos.y = Math.floor(miniMap.cursorY * (rows / miniCanvas.height));
+  // camera.pos.y = camera.pos.y - e.movementY;
+
+  // if (camera.pos.x < 0) camera.pos.x = 0;
+  // if (camera.pos.x >= Math.ceil(cols - camera.visibleCols))
+  //   camera.pos.x = Math.ceil(cols - camera.visibleCols);
+
+  if (camera.pos.y < 0) camera.pos.y = 0;
+  if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
+    camera.pos.y = Math.ceil(rows - camera.visibleRows);
+
+  // camera.offsetCol = camera.pos.x;
+  // camera.offsetRow = camera.pos.y;
+
+  // camera.offsetX = camera.pos.x * tileW;
+  // camera.offsetY = camera.pos.y * tileH;
+});
+
 miniCanvas.addEventListener("mousemove", (e) => {
   let mousePosition = getMousePos(e, miniCanvas);
 
@@ -447,12 +492,7 @@ miniCanvas.addEventListener("mousemove", (e) => {
     // camera.offsetY = camera.pos.y * tileH;
   }
 });
-miniCanvas.addEventListener("click", (e) => {
-  // console.log(cursor);
-  // console.log(matrix[cursor.row][cursor.col]);
-  // bufferCtx.fillStyle = "blue";
-  // bufferCtx.fillRect(cursor.col * tileW, cursor.row * tileH, 32, 32);
-});
+
 miniCanvas.addEventListener("mouseup", (e) => {
   MOUSE_DOWN = false;
 
