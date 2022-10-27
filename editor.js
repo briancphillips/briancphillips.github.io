@@ -143,6 +143,7 @@ class Minimap {
     );
   }
   update() {
+    this.updateViewport();
     this.draw();
   }
 }
@@ -238,8 +239,8 @@ function scaleCanvas(scale) {
 
   if (zoom == 1) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    camera.pos.x = prevRect1x;
-    camera.pos.y = prevRect1y;
+    // camera.pos.x = prevRect1x;
+    // camera.pos.y = prevRect1y;
   }
 
   drawGrid();
