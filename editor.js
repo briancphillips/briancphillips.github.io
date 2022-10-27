@@ -22,25 +22,26 @@ let prevRect1x = 0;
 let prevRect1y = 0;
 
 let cols = 546;
-let displayCols = 40;
 let rows = 42;
+
+let displayCols = 40;
 let displayRows = 21;
 
 let MOUSE_DOWN = false;
 
 const matrix = new Array(rows).fill(0).map(() => new Array(cols).fill(0));
 
-canvas.width = 1280;
-grid.width = 1280;
-canvas.height = tileH * 21;
-grid.height = tileH * 21;
-buffer.width = tileW * 546;
-buffer.height = tileH * 42;
+canvas.width = displayCols * tileW;
+grid.width = displayCols * tileW;
+canvas.height = tileH * displayRows;
+grid.height = tileH * displayRows;
+buffer.width = tileW * cols;
+buffer.height = tileH * rows;
 
 let scaledWidth = canvas.width;
 let scaledHeight = canvas.height;
 
-miniCanvas.width = 0;
+miniCanvas.width = canvas.width;
 miniCanvas.height = tileH;
 
 ctx.strokeStyle = "red";
@@ -61,8 +62,8 @@ class Camera {
     this.offsetY = 0;
     this.offsetCol = 0;
     this.offsetRow = 0;
-    this.visibleCols = 40;
-    this.visibleRows = 21;
+    this.visibleCols = displayCols;
+    this.visibleRows = displayRows;
   }
 
   update() {
@@ -76,46 +77,45 @@ class Minimap {
     this.h = 0;
     this.cursorX = 0;
     this.cursorY = miniCanvas.height / 2;
-    this.cursorW = 61;
+    //console.log("it is " + miniCanvas.width);
+    this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorH = miniCanvas.height;
-    this.cursorViewX = -61;
+    this.cursorViewX = -this.cursorW;
     this.cursorViewY = miniCanvas.height / 2;
-    this.cursorViewW = 61;
+    this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorViewH = miniCanvas.height;
   }
-
   updateViewportOnClick() {
-    miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorH = miniCanvas.height;
-    miniMap.cursorX = miniMouseX - miniMap.cursorW / 2;
+    this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
+    this.cursorH = miniCanvas.height;
+    this.cursorX = miniMouseX - this.cursorW / 2;
 
-    if (miniMap.cursorX <= 0) miniMap.cursorX = 0;
-    if (miniMap.cursorX >= miniCanvas.width - miniMap.cursorW)
-      miniMap.cursorX = miniCanvas.width - miniMap.cursorW;
+    if (this.cursorX <= 0) this.cursorX = 0;
+    if (this.cursorX >= miniCanvas.width - this.cursorW)
+      this.cursorX = miniCanvas.width - this.cursorW;
 
-    miniMap.cursorY = miniMouseY;
-    miniMap.cursorViewX = miniMap.cursorX - miniMap.cursorW;
+    this.cursorY = miniMouseY;
+    this.cursorViewX = this.cursorX - this.cursorW;
 
-    miniMap.cursorViewY = miniMap.cursorY + miniMap.cursorH / 2;
-    if (miniMap.cursorViewY >= miniCanvas.height)
-      miniMap.cursorViewY = miniCanvas.height;
+    this.cursorViewY = this.cursorY + this.cursorH / 2;
+    if (this.cursorViewY >= miniCanvas.height)
+      this.cursorViewY = miniCanvas.height;
 
-    miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+    this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+    this.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
   }
   updateViewport() {
-    miniMap.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorH = miniCanvas.height;
-    miniMap.cursorViewX =
+    this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
+    this.cursorH = miniCanvas.height;
+    this.cursorViewX =
       camera.pos.x * (miniCanvas.width / cols) -
       (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorViewY =
+    this.cursorViewY =
       camera.pos.y * (miniCanvas.height / rows) +
       (displayRows / zoom) * (miniCanvas.height / rows);
-    miniMap.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
-    miniMap.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
+    this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
+    this.cursorViewH = (displayRows / zoom) * (miniCanvas.height / rows);
   }
-
   draw() {
     miniCtx.drawImage(
       buffer,
@@ -142,31 +142,9 @@ class Minimap {
       this.cursorViewH
     );
   }
-
   update() {
     this.draw();
   }
-}
-function loadImage(url) {
-  return new Promise((resolve) => {
-    const image = new Image();
-    image.addEventListener("load", () => {
-      resolve(image);
-    });
-    image.src = url;
-  });
-}
-
-async function loadJson(url) {
-  const data = await fetch(url);
-  return data.json();
-}
-
-async function parseJson(url) {
-  try {
-    const json_data = await loadJson(url);
-    return json_data;
-  } catch (e) {}
 }
 
 let tileSelected = 0;
@@ -205,7 +183,7 @@ const level = parseJson("./map.json").then((m) => {
 });
 
 function drawGrid() {
-  let s = 32 * zoom;
+  let s = tileW * zoom;
 
   gridCtx.strokeStyle = "rgba(255,255,255,0.8)";
   gridCtx.beginPath();
@@ -371,15 +349,33 @@ window.addEventListener("keydown", (e) => {
 
   if (e.code === "ArrowLeft") {
     camera.pos.x = camera.pos.x - 1;
+    miniMap.cursorX =
+      camera.pos.x * (miniCanvas.width / cols) +
+      (displayCols / zoom) * (miniCanvas.width / cols) -
+      miniMap.cursorW;
+    miniMap.updateViewport();
   }
   if (e.code === "ArrowRight") {
     camera.pos.x = camera.pos.x + 1;
+    miniMap.cursorX =
+      camera.pos.x * (miniCanvas.width / cols) +
+      (displayCols / zoom) * (miniCanvas.width / cols) -
+      miniMap.cursorW;
+    miniMap.updateViewport();
   }
   if (e.code === "ArrowUp") {
     camera.pos.y = camera.pos.y - 1;
+    miniMap.cursorViewY =
+      camera.pos.y * (miniCanvas.height / rows) +
+      (displayRows / zoom) * (miniCanvas.height / rows);
+    miniMap.updateViewport();
   }
   if (e.code === "ArrowDown") {
     camera.pos.y = camera.pos.y + 1;
+    miniMap.cursorViewY =
+      camera.pos.y * (miniCanvas.height / rows) +
+      (displayRows / zoom) * (miniCanvas.height / rows);
+    miniMap.updateViewport();
   }
   if (camera.pos.x < 0) camera.pos.x = 0;
   if (camera.pos.x > buffer.width / tileW - canvas.width / tileW)
@@ -484,6 +480,7 @@ window.addEventListener("load", (e) => {
   scaledWidth = parseInt(cs.getPropertyValue("width"), 10);
   scaledHeight = parseInt(cs.getPropertyValue("height"), 10);
   miniCanvas.width = scaledWidth;
+  miniMap.updateViewport();
 });
 
 window.addEventListener("mousemove", (e) => {
