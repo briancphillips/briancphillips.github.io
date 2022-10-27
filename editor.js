@@ -80,7 +80,7 @@ class Minimap {
     //console.log("it is " + miniCanvas.width);
     this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorH = miniCanvas.height;
-    this.cursorViewX = -this.cursorW;
+    this.cursorViewX = this.cursorW / zoom;
     this.cursorViewY = miniCanvas.height / 2;
     this.cursorViewW = (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorViewH = miniCanvas.height;
@@ -95,7 +95,7 @@ class Minimap {
       this.cursorX = miniCanvas.width - this.cursorW;
 
     this.cursorY = miniMouseY;
-    this.cursorViewX = this.cursorX - this.cursorW;
+    this.cursorViewX = this.cursorX + this.cursorW;
 
     this.cursorViewY = this.cursorY + this.cursorH / 2;
     if (this.cursorViewY >= miniCanvas.height)
@@ -108,7 +108,7 @@ class Minimap {
     this.cursorW = (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorH = miniCanvas.height;
     this.cursorViewX =
-      camera.pos.x * (miniCanvas.width / cols) -
+      camera.pos.x * (miniCanvas.width / cols) +
       (displayCols / zoom) * (miniCanvas.width / cols);
     this.cursorViewY =
       camera.pos.y * (miniCanvas.height / rows) +
@@ -136,7 +136,7 @@ class Minimap {
     miniCtx.fillStyle = "rgba(255,255,255,.4)";
 
     miniCtx.fillRect(
-      this.cursorViewX + this.cursorViewW,
+      this.cursorViewX - this.cursorViewW,
       this.cursorViewY - this.cursorViewH,
       this.cursorViewW,
       this.cursorViewH
@@ -339,11 +339,13 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "Minus") {
     zoom -= 1;
     scaleCanvas(zoom);
+    miniMap.update();
     miniMap.updateViewport();
   }
   if (e.code === "Equal") {
     zoom += 1;
     scaleCanvas(zoom);
+    miniMap.update();
     miniMap.updateViewport();
   }
 
@@ -354,6 +356,7 @@ window.addEventListener("keydown", (e) => {
       (displayCols / zoom) * (miniCanvas.width / cols) -
       miniMap.cursorW;
     miniMap.updateViewport();
+    miniMap.update();
   }
   if (e.code === "ArrowRight") {
     camera.pos.x = camera.pos.x + 1;
@@ -362,6 +365,7 @@ window.addEventListener("keydown", (e) => {
       (displayCols / zoom) * (miniCanvas.width / cols) -
       miniMap.cursorW;
     miniMap.updateViewport();
+    miniMap.update();
   }
   if (e.code === "ArrowUp") {
     camera.pos.y = camera.pos.y - 1;
@@ -369,6 +373,7 @@ window.addEventListener("keydown", (e) => {
       camera.pos.y * (miniCanvas.height / rows) +
       (displayRows / zoom) * (miniCanvas.height / rows);
     miniMap.updateViewport();
+    miniMap.update();
   }
   if (e.code === "ArrowDown") {
     camera.pos.y = camera.pos.y + 1;
@@ -376,6 +381,7 @@ window.addEventListener("keydown", (e) => {
       camera.pos.y * (miniCanvas.height / rows) +
       (displayRows / zoom) * (miniCanvas.height / rows);
     miniMap.updateViewport();
+    miniMap.update();
   }
   if (camera.pos.x < 0) camera.pos.x = 0;
   if (camera.pos.x > buffer.width / tileW - canvas.width / tileW)
@@ -429,7 +435,7 @@ miniCanvas.addEventListener("mousemove", (e) => {
       miniMap.cursorX = miniCanvas.width - miniMap.cursorW;
 
     miniMap.cursorY = miniMouseY;
-    miniMap.cursorViewX = miniMap.cursorX - miniMap.cursorW;
+    miniMap.cursorViewX = miniMap.cursorX + miniMap.cursorW;
 
     miniMap.cursorViewY = miniMap.cursorY + miniMap.cursorH / 2;
     if (miniMap.cursorViewY >= miniCanvas.height)
