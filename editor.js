@@ -29,6 +29,9 @@ let displayRows = 21;
 
 let MOUSE_DOWN = false;
 
+let mode = "view";
+document.querySelector("#mode").textContent = mode;
+
 const matrix = new Array(rows).fill(0).map(() => new Array(cols).fill(0));
 
 canvas.width = displayCols * tileW;
@@ -108,7 +111,6 @@ class Minimap {
     this.tileZoomRatioW = displayCols / zoom;
     this.tileZoomRatioH = displayRows / zoom;
 
-    //console.log("it is " + miniCanvas.width);
     this.cursorW = this.tileZoomRatioW * this.tileW;
     this.cursorH = miniCanvas.height;
     this.cursorViewX = this.cursorW / zoom;
@@ -158,11 +160,11 @@ class Minimap {
       miniCanvas.height
     );
 
-    miniCtx.fillStyle = "rgba(100,100,100,.6)";
+    miniCtx.fillStyle = "rgba(100,100,100,.2)";
 
     miniCtx.fillRect(this.cursorX, 0, this.cursorW, this.cursorH);
 
-    miniCtx.fillStyle = "rgba(255,255,255,.4)";
+    miniCtx.fillStyle = "rgba(255,255,0,.4)";
 
     miniCtx.fillRect(
       this.cursorViewX - this.cursorViewW,
@@ -398,6 +400,16 @@ window.addEventListener("keydown", (e) => {
     miniMap.updateViewport();
     miniMap.update();
   }
+
+  if (e.code === "Backquote") {
+    if (mode === "view") {
+      mode = "edit";
+    } else {
+      mode = "view";
+    }
+    document.querySelector("#mode").textContent = mode;
+  }
+
   if (camera.pos.x < 0) camera.pos.x = 0;
   if (camera.pos.x > bufferCanvas.width / tileW - canvas.width / tileW)
     camera.pos.x = bufferCanvas.width / tileW - canvas.width / tileW;
@@ -439,7 +451,6 @@ miniCanvas.addEventListener("mousemove", (e) => {
   miniMouseY = mousePosition.y;
 
   if (MOUSE_DOWN) {
-    console.log(Math.floor(miniMap.cursorX));
     miniCanvas.setAttribute("style", "cursor: all-scroll");
     miniMap.cursorW = miniMap.tileZoomRatioW * miniMap.tileW;
     miniMap.cursorH = miniCanvas.height;
@@ -511,6 +522,20 @@ window.addEventListener("load", (e) => {
 
 window.addEventListener("mousemove", (e) => {
   gridCanvas.onmouseover = (e) => {};
+});
+
+window.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+
+  if (e.button === 2) {
+    MOUSE_DOWN = false;
+    if (mode === "view") {
+      mode = "edit";
+    } else {
+      mode = "view";
+    }
+    document.querySelector("#mode").textContent = mode;
+  }
 });
 
 // tiles used in 32x32.png
