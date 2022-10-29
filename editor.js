@@ -273,6 +273,8 @@ function highlightCell(pos) {
   cursor.row = Math.floor(pos.y / (tileH * zoom) + camera.offsetRow);
   document.querySelector("#col").textContent = cursor.col;
   document.querySelector("#row").textContent = cursor.row;
+  document.querySelector("#tileNumber").textContent =
+    matrix[cursor.row][cursor.col];
 }
 
 function getMousePos(evt, src) {
