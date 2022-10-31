@@ -50,6 +50,49 @@ miniCanvas.height = tileH;
 ctx.strokeStyle = "red";
 ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
+class Editor {
+  constructor() {
+    this.title = "THEXDER";
+    this.map = "";
+    this.loadLevel();
+  }
+
+  loadLevel() {
+    const level = parseJson("./map.json").then((m) => {
+      const layers = m.layers;
+
+      const tileMapCols = 5;
+
+      bufferCtx.fillStyle = "black";
+      bufferCtx.fillRect(0, 0, bufferCanvas.width, bufferCanvas.height);
+
+      layers.forEach((layer) => {
+        loadImage("./images/tiles.png").then((img) => {
+          layer.data.forEach((element, i) => {
+            const col = i % cols;
+            const row = parseInt(i / cols, 10);
+            const tilemapX = element % tileMapCols;
+            const tileMapY = Math.floor(element / tileMapCols);
+            matrix[row][col] = element;
+
+            bufferCtx.drawImage(
+              img,
+              tilemapX * tileW,
+              tileMapY * tileH,
+              tileW,
+              tileH,
+              col * tileW,
+              row * tileH,
+              tileW,
+              tileH
+            );
+          });
+        });
+      });
+    });
+  }
+}
+
 class Cursor {
   constructor() {
     this.col = 0;
@@ -179,41 +222,7 @@ class Minimap {
   }
 }
 
-let tileSelected = 0;
-
-const level = parseJson("./map.json").then((m) => {
-  const layers = m.layers;
-
-  const tileMapCols = 5;
-
-  bufferCtx.fillStyle = "black";
-  bufferCtx.fillRect(0, 0, bufferCanvas.width, bufferCanvas.height);
-
-  layers.forEach((layer) => {
-    loadImage("./images/tiles.png").then((img) => {
-      layer.data.forEach((element, i) => {
-        const col = i % cols;
-        const row = parseInt(i / cols, 10);
-        const tilemapX = element % tileMapCols;
-        const tileMapY = Math.floor(element / tileMapCols);
-        matrix[row][col] = element;
-
-        bufferCtx.drawImage(
-          img,
-          tilemapX * tileW,
-          tileMapY * tileH,
-          tileW,
-          tileH,
-          col * tileW,
-          row * tileH,
-          tileW,
-          tileH
-        );
-      });
-    });
-  });
-});
-
+const editor = new Editor();
 const grid = new Grid();
 const camera = new Camera();
 const cursor = new Cursor();
@@ -347,6 +356,8 @@ gridCanvas.addEventListener("mousedown", (e) => {
 window.addEventListener("keydown", (e) => {
   if (e.code === "Digit0") {
     zoom = 1;
+    //cursor.col = Math.floor(pos.x / (tileW * zoom) + camera.offsetCol);
+    //cursor.row = Math.floor(pos.y / (tileH * zoom) + camera.offsetRow);
     scaleCanvas(zoom);
     miniMap.tileZoomRatioW = displayCols / zoom;
     miniMap.tileZoomRatioH = displayRows / zoom;
@@ -354,7 +365,10 @@ window.addEventListener("keydown", (e) => {
     miniMap.updateViewport();
   }
   if (e.code === "Minus") {
+    //cursor.col = Math.floor(pos.x / (tileW * zoom) + camera.offsetCol);
+    //cursor.row = Math.floor(pos.y / (tileH * zoom) + camera.offsetRow);
     zoom -= 1;
+
     scaleCanvas(zoom);
     miniMap.tileZoomRatioW = displayCols / zoom;
     miniMap.tileZoomRatioH = displayRows / zoom;
@@ -362,6 +376,8 @@ window.addEventListener("keydown", (e) => {
     miniMap.updateViewport();
   }
   if (e.code === "Equal") {
+    //cursor.col = Math.floor(pos.x / (tileW * zoom) + camera.offsetCol);
+    //cursor.row = Math.floor(pos.y / (tileH * zoom) + camera.offsetRow);
     zoom += 1;
     scaleCanvas(zoom);
     miniMap.tileZoomRatioW = displayCols / zoom;
