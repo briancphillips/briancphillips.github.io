@@ -71,6 +71,41 @@ button:hover {
   background-color: #333333;
   color: white;
 }
+
+div#mode {
+  position: absolute;
+  top: 160px;
+  left: 40px;
+  color: white;
+  font-family: "Press Start 2P", cursive;
+}
+
+div#tilePropsContainer {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  color: white;
+  font-family: "Press Start 2P", cursive;
+  image-rendering: pixelated;
+}
+
+div#zoomContainer {
+  position: absolute;
+  left: 40px;
+  top: 100px;
+  color: white;
+  font-family: "Press Start 2P", cursive;
+  image-rendering: pixelated;
+}
+
+div#row,
+div#col,
+div#tileNumber,
+div#zoom {
+  display: inline-block;
+  image-rendering: pixelated;
+  width: 50px;
+}
 div.ctt {
   cursor: pointer;
   position: absolute;

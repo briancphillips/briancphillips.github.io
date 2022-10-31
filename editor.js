@@ -460,6 +460,12 @@ miniCanvas.addEventListener("click", (e) => {
   if (camera.pos.y < 0) camera.pos.y = 0;
   if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
     camera.pos.y = Math.ceil(rows - camera.visibleRows);
+
+  camera.offsetCol = camera.pos.x;
+  camera.offsetRow = camera.pos.y;
+
+  camera.offsetX = camera.pos.x * tileW;
+  camera.offsetY = camera.pos.y * tileH;
 });
 
 miniCanvas.addEventListener("mousemove", (e) => {
@@ -488,12 +494,19 @@ miniCanvas.addEventListener("mousemove", (e) => {
     miniMap.cursorViewW = miniMap.tileZoomRatioW * miniMap.tileW;
     miniMap.cursorViewH = miniMap.tileZoomRatioH * miniMap.tileH;
 
+    //TODO create method for code below to update camera props on any change
     camera.pos.x = Math.floor(miniMap.cursorX * (cols / miniCanvas.width));
     camera.pos.y = Math.floor(miniMap.cursorY * (rows / miniCanvas.height));
 
     if (camera.pos.y < 0) camera.pos.y = 0;
     if (camera.pos.y >= Math.ceil(rows - camera.visibleRows))
       camera.pos.y = Math.ceil(rows - camera.visibleRows);
+
+    camera.offsetCol = camera.pos.x;
+    camera.offsetRow = camera.pos.y;
+
+    camera.offsetX = camera.pos.x * tileW;
+    camera.offsetY = camera.pos.y * tileH;
   }
 });
 
@@ -555,6 +568,3 @@ window.addEventListener("contextmenu", (e) => {
     document.querySelector("#mode").textContent = mode;
   }
 });
-
-// tiles used in 32x32.png
-// 4,7,1,6,11,23,0,20,21,25,26,22,44,72,30,23
