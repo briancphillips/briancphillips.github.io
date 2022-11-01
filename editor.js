@@ -21,7 +21,7 @@ let miniMouseY = 0;
 let prevRect1x = 0;
 let prevRect1y = 0;
 
-let cols = 546;
+let cols = 20;
 let rows = 42;
 
 let displayCols = 40;
