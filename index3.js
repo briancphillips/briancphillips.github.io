@@ -146,18 +146,18 @@ async function parseJson(url) {
 
 const level = parseJson("./map.json").then((m) => {
   const layers = m.layers;
-  const cols = m.width;
-  const tileMapCols = m.tilewidth;
+  const cols = 546;
+  const tileMapCols = 5;
   bufferCtx.fillStyle = "black";
   bufferCtx.fillRect(0, 0, buffer.width, buffer.height);
 
   layers.forEach((layer) => {
-    loadImage("./images/tiles32x32.png").then((img) => {
+    loadImage("./images/tiles.png").then((img) => {
       layer.data.forEach((element, i) => {
         const col = i % cols;
         const row = parseInt(i / cols, 10);
-        const tilemapX = (element - 1) % tileMapCols;
-        const tileMapY = Math.floor((element - 1) / tileMapCols);
+        const tilemapX = element % tileMapCols;
+        const tileMapY = Math.floor(element / tileMapCols);
 
         bufferCtx.drawImage(
           img,
